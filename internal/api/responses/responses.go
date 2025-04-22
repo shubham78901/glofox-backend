@@ -3,9 +3,8 @@
 package responses
 
 import (
+	"encoding/json"
 	"net/http"
-
-	"github.com/gin-gonic/gin"
 )
 
 // Response represents a standard API response
@@ -16,9 +15,16 @@ type Response struct {
 	Data    interface{} `json:"data,omitempty"`
 }
 
+// WriteJSON writes a JSON response to the http.ResponseWriter
+func WriteJSON(w http.ResponseWriter, statusCode int, response Response) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
+	json.NewEncoder(w).Encode(response)
+}
+
 // SuccessResponse sends a success response
-func SuccessResponse(c *gin.Context, statusCode int, message string, data interface{}) {
-	c.JSON(statusCode, Response{
+func SuccessResponse(w http.ResponseWriter, statusCode int, message string, data interface{}) {
+	WriteJSON(w, statusCode, Response{
 		Success: true,
 		Message: message,
 		Data:    data,
@@ -26,21 +32,21 @@ func SuccessResponse(c *gin.Context, statusCode int, message string, data interf
 }
 
 // CreatedResponse sends a 201 Created response
-func CreatedResponse(c *gin.Context, message string, data interface{}) {
-	SuccessResponse(c, http.StatusCreated, message, data)
+func CreatedResponse(w http.ResponseWriter, message string, data interface{}) {
+	SuccessResponse(w, http.StatusCreated, message, data)
 }
 
 // OKResponse sends a 200 OK response
-func OKResponse(c *gin.Context, data interface{}) {
-	c.JSON(http.StatusOK, Response{
+func OKResponse(w http.ResponseWriter, data interface{}) {
+	WriteJSON(w, http.StatusOK, Response{
 		Success: true,
 		Data:    data,
 	})
 }
 
 // ListResponse sends a 200 OK response with a count field
-func ListResponse(c *gin.Context, data interface{}, count int) {
-	c.JSON(http.StatusOK, Response{
+func ListResponse(w http.ResponseWriter, data interface{}, count int) {
+	WriteJSON(w, http.StatusOK, Response{
 		Success: true,
 		Count:   count,
 		Data:    data,
@@ -48,24 +54,24 @@ func ListResponse(c *gin.Context, data interface{}, count int) {
 }
 
 // ErrorResponse sends an error response
-func ErrorResponse(c *gin.Context, statusCode int, message string) {
-	c.JSON(statusCode, Response{
+func ErrorResponse(w http.ResponseWriter, statusCode int, message string) {
+	WriteJSON(w, statusCode, Response{
 		Success: false,
 		Message: message,
 	})
 }
 
 // BadRequestResponse sends a 400 Bad Request response
-func BadRequestResponse(c *gin.Context, message string) {
-	ErrorResponse(c, http.StatusBadRequest, message)
+func BadRequestResponse(w http.ResponseWriter, message string) {
+	ErrorResponse(w, http.StatusBadRequest, message)
 }
 
 // NotFoundResponse sends a 404 Not Found response
-func NotFoundResponse(c *gin.Context, message string) {
-	ErrorResponse(c, http.StatusNotFound, message)
+func NotFoundResponse(w http.ResponseWriter, message string) {
+	ErrorResponse(w, http.StatusNotFound, message)
 }
 
 // InternalServerErrorResponse sends a 500 Internal Server Error response
-func InternalServerErrorResponse(c *gin.Context) {
-	ErrorResponse(c, http.StatusInternalServerError, "Internal server error")
+func InternalServerErrorResponse(w http.ResponseWriter) {
+	ErrorResponse(w, http.StatusInternalServerError, "Internal server error")
 }

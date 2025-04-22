@@ -1,41 +1,48 @@
+// File: internal/api/middleware/middleware.go
+
 package middleware
 
 import (
+	"encoding/json"
 	"log"
+	"net/http"
 	"time"
-
-	"github.com/gin-gonic/gin"
 )
 
-// Logger is a middleware that logs request details
-func Logger() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		start := time.Now()
-		path := c.Request.URL.Path
-		method := c.Request.Method
+// Response represents a standard API response
+type Response struct {
+	Success bool   `json:"success"`
+	Message string `json:"message"`
+}
 
-		c.Next()
+// Logger is a middleware that logs request details
+func Logger(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+		path := r.URL.Path
+		method := r.Method
+
+		next.ServeHTTP(w, r)
 
 		latency := time.Since(start)
-		statusCode := c.Writer.Status()
-
-		// Using log package instead of c.Logger() which doesn't exist
-		log.Printf("%s %s %d %s", method, path, statusCode, latency)
-	}
+		log.Printf("%s %s %s", method, path, latency)
+	})
 }
 
 // ErrorHandler is a middleware that catches panics and returns 500 errors
-func ErrorHandler() gin.HandlerFunc {
-	return func(c *gin.Context) {
+func ErrorHandler(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
 			if err := recover(); err != nil {
-				c.JSON(500, gin.H{
-					"success": false,
-					"message": "Internal server error",
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusInternalServerError)
+				json.NewEncoder(w).Encode(Response{
+					Success: false,
+					Message: "Internal server error",
 				})
 			}
 		}()
 
-		c.Next()
-	}
+		next.ServeHTTP(w, r)
+	})
 }

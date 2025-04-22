@@ -3,7 +3,10 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"net/http"
+	"os"
 
 	_ "glofox-backend/docs"
 	"glofox-backend/internal/api"
@@ -17,6 +20,11 @@ import (
 // @host            localhost:8080
 // @BasePath        /
 func main() {
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
 	// Initialize repositories
 	classRepo := repositories.NewClassRepository()
 	bookingRepo := repositories.NewBookingRepository(classRepo)
@@ -28,8 +36,10 @@ func main() {
 	// Setup router
 	router := api.SetupRouter(classHandler, bookingHandler)
 
-	log.Println("Server is running on :8080")
-	if err := router.Run(":8080"); err != nil {
+	// Start server
+	serverAddr := fmt.Sprintf(":%s", port)
+	log.Printf("Server is running on %s", serverAddr)
+	if err := http.ListenAndServe(serverAddr, router); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
 }

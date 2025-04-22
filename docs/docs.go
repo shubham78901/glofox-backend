@@ -27,7 +27,7 @@ const docTemplate = `{
                 "summary": "Get all bookings",
                 "responses": {
                     "200": {
-                        "description": "A list of bookings",
+                        "description": "List of bookings",
                         "schema": {
                             "allOf": [
                                 {
@@ -46,12 +46,6 @@ const docTemplate = `{
                                 }
                             ]
                         }
-                    },
-                    "500": {
-                        "description": "Server error",
-                        "schema": {
-                            "$ref": "#/definitions/responses.Response"
-                        }
                     }
                 }
             },
@@ -69,7 +63,7 @@ const docTemplate = `{
                 "summary": "Create a new booking",
                 "parameters": [
                     {
-                        "description": "Booking data",
+                        "description": "Booking information",
                         "name": "booking",
                         "in": "body",
                         "required": true,
@@ -98,13 +92,7 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Invalid input or no class available for the date",
-                        "schema": {
-                            "$ref": "#/definitions/responses.Response"
-                        }
-                    },
-                    "500": {
-                        "description": "Server error",
+                        "description": "Invalid input",
                         "schema": {
                             "$ref": "#/definitions/responses.Response"
                         }
@@ -121,7 +109,7 @@ const docTemplate = `{
                 "tags": [
                     "bookings"
                 ],
-                "summary": "Get a booking by ID",
+                "summary": "Get booking by ID",
                 "parameters": [
                     {
                         "type": "string",
@@ -133,7 +121,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Booking details",
+                        "description": "Booking found",
                         "schema": {
                             "allOf": [
                                 {
@@ -155,19 +143,13 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/responses.Response"
                         }
-                    },
-                    "500": {
-                        "description": "Server error",
-                        "schema": {
-                            "$ref": "#/definitions/responses.Response"
-                        }
                     }
                 }
             }
         },
         "/classes": {
             "get": {
-                "description": "Retrieves a list of all classes",
+                "description": "Retrieves a list of all classes, optionally filtered by date",
                 "produces": [
                     "application/json"
                 ],
@@ -178,14 +160,14 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Optional date to filter classes (YYYY-MM-DD)",
+                        "description": "Filter classes by date (YYYY-MM-DD)",
                         "name": "date",
                         "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "A list of classes",
+                        "description": "List of classes",
                         "schema": {
                             "allOf": [
                                 {
@@ -210,17 +192,11 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/responses.Response"
                         }
-                    },
-                    "500": {
-                        "description": "Server error",
-                        "schema": {
-                            "$ref": "#/definitions/responses.Response"
-                        }
                     }
                 }
             },
             "post": {
-                "description": "Creates a new class with the provided details",
+                "description": "Creates a new fitness class with the provided details",
                 "consumes": [
                     "application/json"
                 ],
@@ -233,7 +209,7 @@ const docTemplate = `{
                 "summary": "Create a new class",
                 "parameters": [
                     {
-                        "description": "Class data",
+                        "description": "Class information",
                         "name": "class",
                         "in": "body",
                         "required": true,
@@ -285,7 +261,7 @@ const docTemplate = `{
                 "tags": [
                     "classes"
                 ],
-                "summary": "Get a class by ID",
+                "summary": "Get class by ID",
                 "parameters": [
                     {
                         "type": "string",
@@ -297,7 +273,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Class details",
+                        "description": "Class found",
                         "schema": {
                             "allOf": [
                                 {
@@ -316,12 +292,6 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Class not found",
-                        "schema": {
-                            "$ref": "#/definitions/responses.Response"
-                        }
-                    },
-                    "500": {
-                        "description": "Server error",
                         "schema": {
                             "$ref": "#/definitions/responses.Response"
                         }
@@ -355,17 +325,17 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "classId",
-                "date",
-                "name"
+                "className",
+                "date"
             ],
             "properties": {
                 "classId": {
                     "type": "string"
                 },
-                "date": {
+                "className": {
                     "type": "string"
                 },
-                "name": {
+                "date": {
                     "type": "string"
                 }
             }
@@ -445,7 +415,7 @@ var SwaggerInfo = &swag.Spec{
 	Description:      "API for managing studio classes and bookings",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
-
+	
 }
 
 func init() {

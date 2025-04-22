@@ -20,7 +20,7 @@ type Booking struct {
 
 // BookingInput represents the input data for creating a booking
 type BookingInput struct {
-	Name    string `json:"name" binding:"required"`
+	Name    string `json:"className" binding:"required"`
 	Date    string `json:"date" binding:"required"`
 	ClassID string `json:"classId" binding:"required"`
 }

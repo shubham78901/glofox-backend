@@ -3,43 +3,45 @@
 package api
 
 import (
-	"glofox-backend/internal/api/handlers"
+	"encoding/json"
+	"net/http"
 
-	"github.com/gin-gonic/gin"
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
+	"glofox-backend/internal/api/handlers"
+	"glofox-backend/internal/api/middleware"
+
+	"github.com/gorilla/mux"
 )
 
 // SetupRouter configures all the routes and handlers
-func SetupRouter(classHandler *handlers.ClassHandler, bookingHandler *handlers.BookingHandler) *gin.Engine {
-	router := gin.Default()
+func SetupRouter(classHandler *handlers.ClassHandler, bookingHandler *handlers.BookingHandler) *mux.Router {
+	router := mux.NewRouter()
 
-	// Swagger documentation
-	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	// Apply middleware
+	router.Use(middleware.Logger)
+	router.Use(middleware.ErrorHandler)
+
+	// Setup Swagger
+	SetupSwagger(router)
 
 	// Home endpoint
-	router.GET("/", func(c *gin.Context) {
-		c.JSON(200, gin.H{
+	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(map[string]string{
 			"message":       "Welcome to Glofox Studio API",
 			"documentation": "/swagger/index.html",
 		})
-	})
+	}).Methods("GET")
 
 	// Class routes
-	classRoutes := router.Group("/classes")
-	{
-		classRoutes.POST("/", classHandler.CreateClass)
-		classRoutes.GET("/", classHandler.GetAllClasses)
-		classRoutes.GET("/:id", classHandler.GetClassByID)
-	}
+	router.HandleFunc("/classes", classHandler.CreateClass).Methods("POST")
+	router.HandleFunc("/classes", classHandler.GetAllClasses).Methods("GET")
+	router.HandleFunc("/classes/{id}", classHandler.GetClassByID).Methods("GET")
 
 	// Booking routes
-	bookingRoutes := router.Group("/bookings")
-	{
-		bookingRoutes.POST("/", bookingHandler.CreateBooking)
-		bookingRoutes.GET("/", bookingHandler.GetAllBookings)
-		bookingRoutes.GET("/:id", bookingHandler.GetBookingByID)
-	}
+	router.HandleFunc("/bookings", bookingHandler.CreateBooking).Methods("POST")
+	router.HandleFunc("/bookings", bookingHandler.GetAllBookings).Methods("GET")
+	router.HandleFunc("/bookings/{id}", bookingHandler.GetBookingByID).Methods("GET")
 
 	return router
 }
