@@ -1,0 +1,267 @@
+basePath: /
+definitions:
+  models.Booking:
+    properties:
+      classId:
+        type: string
+      createdAt:
+        type: string
+      date:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+    type: object
+  models.BookingInput:
+    properties:
+      classId:
+        type: string
+      date:
+        type: string
+      name:
+        type: string
+    required:
+    - classId
+    - date
+    - name
+    type: object
+  models.Class:
+    properties:
+      capacity:
+        type: integer
+      className:
+        type: string
+      createdAt:
+        type: string
+      endDate:
+        type: string
+      id:
+        type: string
+      startDate:
+        type: string
+    type: object
+  models.ClassInput:
+    properties:
+      capacity:
+        minimum: 1
+        type: integer
+      className:
+        type: string
+      endDate:
+        type: string
+      startDate:
+        type: string
+    required:
+    - capacity
+    - className
+    - endDate
+    - startDate
+    type: object
+  responses.Response:
+    properties:
+      count:
+        type: integer
+      data: {}
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: API for managing studio classes and bookings
+  title: Glofox Studio API
+  version: "1.0"
+paths:
+  /bookings:
+    get:
+      description: Retrieves a list of all bookings
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: A list of bookings
+          schema:
+            allOf:
+            - $ref: '#/definitions/responses.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.Booking'
+                  type: array
+              type: object
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/responses.Response'
+      summary: Get all bookings
+      tags:
+      - bookings
+    post:
+      consumes:
+      - application/json
+      description: Creates a new booking for a member to attend a class
+      parameters:
+      - description: Booking data
+        in: body
+        name: booking
+        required: true
+        schema:
+          $ref: '#/definitions/models.BookingInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Booking created successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/responses.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Booking'
+              type: object
+        "400":
+          description: Invalid input or no class available for the date
+          schema:
+            $ref: '#/definitions/responses.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/responses.Response'
+      summary: Create a new booking
+      tags:
+      - bookings
+  /bookings/{id}:
+    get:
+      description: Retrieves a booking by its ID
+      parameters:
+      - description: Booking ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Booking details
+          schema:
+            allOf:
+            - $ref: '#/definitions/responses.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Booking'
+              type: object
+        "404":
+          description: Booking not found
+          schema:
+            $ref: '#/definitions/responses.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/responses.Response'
+      summary: Get a booking by ID
+      tags:
+      - bookings
+  /classes:
+    get:
+      description: Retrieves a list of all classes
+      parameters:
+      - description: Optional date to filter classes (YYYY-MM-DD)
+        in: query
+        name: date
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: A list of classes
+          schema:
+            allOf:
+            - $ref: '#/definitions/responses.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.Class'
+                  type: array
+              type: object
+        "400":
+          description: Invalid date format
+          schema:
+            $ref: '#/definitions/responses.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/responses.Response'
+      summary: Get all classes
+      tags:
+      - classes
+    post:
+      consumes:
+      - application/json
+      description: Creates a new class with the provided details
+      parameters:
+      - description: Class data
+        in: body
+        name: class
+        required: true
+        schema:
+          $ref: '#/definitions/models.ClassInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Class created successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/responses.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Class'
+              type: object
+        "400":
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/responses.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/responses.Response'
+      summary: Create a new class
+      tags:
+      - classes
+  /classes/{id}:
+    get:
+      description: Retrieves a class by its ID
+      parameters:
+      - description: Class ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Class details
+          schema:
+            allOf:
+            - $ref: '#/definitions/responses.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Class'
+              type: object
+        "404":
+          description: Class not found
+          schema:
+            $ref: '#/definitions/responses.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/responses.Response'
+      summary: Get a class by ID
+      tags:
+      - classes
+swagger: "2.0"
