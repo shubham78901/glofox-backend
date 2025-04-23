@@ -1,5 +1,3 @@
-// File: internal/api/handlers/class_test.go
-
 package handlers
 
 import (
@@ -17,7 +15,6 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-// Mock ClassRepository
 type MockClassRepository struct {
 	mock.Mock
 }
@@ -46,7 +43,6 @@ func TestCreateClass(t *testing.T) {
 	mockRepo := new(MockClassRepository)
 	handler := NewClassHandler(mockRepo)
 
-	// Setup a valid class input
 	classInput := models.ClassInput{
 		ClassName: "Test Class",
 		StartDate: "2022-01-01",
@@ -55,21 +51,16 @@ func TestCreateClass(t *testing.T) {
 	}
 	requestBody, _ := json.Marshal(classInput)
 
-	// Mock the repo.Create method to return nil error
 	mockRepo.On("Create", mock.AnythingOfType("*models.Class")).Return(nil)
 
-	// Create a request
 	req := httptest.NewRequest("POST", "/classes", bytes.NewBuffer(requestBody))
 	req.Header.Set("Content-Type", "application/json")
 	recorder := httptest.NewRecorder()
 
-	// Call the handler
 	handler.CreateClass(recorder, req)
 
-	// Assert the response
 	assert.Equal(t, http.StatusCreated, recorder.Code)
 
-	// Verify mock expectations
 	mockRepo.AssertExpectations(t)
 }
 
