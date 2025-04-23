@@ -42,9 +42,9 @@ glofox-backend/
   │   │   ├── middleware/        # HTTP middleware
   │   │   ├── responses/         # API response utilities
   │   │   └── router.go          # API routes configuration
-  │   ├── models/                # Domain models
+  │   ├── models/                # Domain models + Validation utilities
   │   ├── repositories/          # Data access layer
-  │   └── validator/             # Validation utilities
+  │ 
   ├── Makefile                   # Build and deployment commands
   ├── Dockerfile                 # Docker container definition
   └── README.md                  # This file
