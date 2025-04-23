@@ -1,5 +1,3 @@
-// File: internal/api/handlers/booking_test.go
-
 package handlers
 
 import (
@@ -18,7 +16,6 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-// Mock BookingRepository
 type MockBookingRepository struct {
 	mock.Mock
 }
@@ -50,7 +47,6 @@ func TestCreateBooking(t *testing.T) {
 	mockRepo := new(MockBookingRepository)
 	handler := NewBookingHandler(mockRepo)
 
-	// Setup a valid booking input
 	bookingInput := models.BookingInput{
 		Name:    "John Doe",
 		Date:    "2022-01-05",
@@ -58,21 +54,16 @@ func TestCreateBooking(t *testing.T) {
 	}
 	requestBody, _ := json.Marshal(bookingInput)
 
-	// Mock the repo.Create method to return nil error
 	mockRepo.On("Create", mock.AnythingOfType("*models.Booking")).Return(nil)
 
-	// Create a request
 	req := httptest.NewRequest("POST", "/bookings", bytes.NewBuffer(requestBody))
 	req.Header.Set("Content-Type", "application/json")
 	recorder := httptest.NewRecorder()
 
-	// Call the handler
 	handler.CreateBooking(recorder, req)
 
-	// Assert the response
 	assert.Equal(t, http.StatusCreated, recorder.Code)
 
-	// Verify mock expectations
 	mockRepo.AssertExpectations(t)
 }
 
@@ -80,7 +71,6 @@ func TestGetBookingByID(t *testing.T) {
 	mockRepo := new(MockBookingRepository)
 	handler := NewBookingHandler(mockRepo)
 
-	// Create a mock booking to return
 	mockBooking := &models.Booking{
 		ID:        "test-id",
 		Name:      "John Doe",
@@ -89,21 +79,16 @@ func TestGetBookingByID(t *testing.T) {
 		CreatedAt: time.Now(),
 	}
 
-	// Setup the mock
 	mockRepo.On("GetByID", "test-id").Return(mockBooking, nil)
 
-	// Create a request
 	req := httptest.NewRequest("GET", "/bookings/test-id", nil)
 	req = mux.SetURLVars(req, map[string]string{"id": "test-id"})
 	recorder := httptest.NewRecorder()
 
-	// Call the handler
 	handler.GetBookingByID(recorder, req)
 
-	// Assert the response
 	assert.Equal(t, http.StatusOK, recorder.Code)
 
-	// Verify mock expectations
 	mockRepo.AssertExpectations(t)
 }
 
@@ -111,21 +96,16 @@ func TestGetBookingByID_NotFound(t *testing.T) {
 	mockRepo := new(MockBookingRepository)
 	handler := NewBookingHandler(mockRepo)
 
-	// Setup the mock to return an error
 	mockRepo.On("GetByID", "non-existent-id").Return(nil, errors.New("booking not found"))
 
-	// Create a request
 	req := httptest.NewRequest("GET", "/bookings/non-existent-id", nil)
 	req = mux.SetURLVars(req, map[string]string{"id": "non-existent-id"})
 	recorder := httptest.NewRecorder()
 
-	// Call the handler
 	handler.GetBookingByID(recorder, req)
 
-	// Assert the response
 	assert.Equal(t, http.StatusNotFound, recorder.Code)
 
-	// Verify mock expectations
 	mockRepo.AssertExpectations(t)
 }
 
@@ -133,7 +113,6 @@ func TestGetAllBookings(t *testing.T) {
 	mockRepo := new(MockBookingRepository)
 	handler := NewBookingHandler(mockRepo)
 
-	// Create mock bookings
 	mockBookings := []*models.Booking{
 		{
 			ID:        "test-id-1",
@@ -151,19 +130,14 @@ func TestGetAllBookings(t *testing.T) {
 		},
 	}
 
-	// Setup the mock
 	mockRepo.On("GetAll").Return(mockBookings)
 
-	// Create a request
 	req := httptest.NewRequest("GET", "/bookings", nil)
 	recorder := httptest.NewRecorder()
 
-	// Call the handler
 	handler.GetAllBookings(recorder, req)
 
-	// Assert the response
 	assert.Equal(t, http.StatusOK, recorder.Code)
 
-	// Verify mock expectations
 	mockRepo.AssertExpectations(t)
 }

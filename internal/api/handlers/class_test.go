@@ -87,6 +87,7 @@ func TestGetClassByID(t *testing.T) {
 	recorder := httptest.NewRecorder()
 
 	// Call the handler
+
 	handler.GetClassByID(recorder, req)
 
 	// Assert the response
