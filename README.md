@@ -120,8 +120,6 @@ go run cmd/api/main.go
 ## Testing
 
 ```bash
-# Run all tests
-go test ./...
 
 # Run specific tests
 go test ./internal/api/handlers -v
