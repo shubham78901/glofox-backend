@@ -1,5 +1,3 @@
-// File: internal/repositories/booking.go
-
 package repositories
 
 import (
@@ -9,7 +7,6 @@ import (
 	"time"
 )
 
-// BookingRepository defines the interface for booking storage operations
 type BookingRepository interface {
 	Create(booking *models.Booking) error
 	GetAll() []*models.Booking
@@ -17,14 +14,12 @@ type BookingRepository interface {
 	GetByClassAndDate(classID string, date time.Time) []*models.Booking
 }
 
-// InMemoryBookingRepository implements BookingRepository with in-memory storage
 type InMemoryBookingRepository struct {
 	bookings  map[string]*models.Booking
 	classRepo ClassRepository
 	mutex     sync.RWMutex
 }
 
-// NewBookingRepository creates a new instance of InMemoryBookingRepository
 func NewBookingRepository(classRepo ClassRepository) BookingRepository {
 	return &InMemoryBookingRepository{
 		bookings:  make(map[string]*models.Booking),
@@ -32,7 +27,6 @@ func NewBookingRepository(classRepo ClassRepository) BookingRepository {
 	}
 }
 
-// Create adds a new booking to the repository
 func (r *InMemoryBookingRepository) Create(booking *models.Booking) error {
 	// Check if class exists
 	class, err := r.classRepo.GetByID(booking.ClassID)

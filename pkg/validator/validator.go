@@ -5,7 +5,6 @@ import (
 	"time"
 )
 
-// ValidateDate validates a date string in YYYY-MM-DD format
 func ValidateDate(dateStr string) (time.Time, error) {
 	if dateStr == "" {
 		return time.Time{}, errors.New("date is required")
@@ -19,7 +18,6 @@ func ValidateDate(dateStr string) (time.Time, error) {
 	return date, nil
 }
 
-// ValidateDateRange validates start and end dates
 func ValidateDateRange(startDateStr, endDateStr string) (time.Time, time.Time, error) {
 	startDate, err := ValidateDate(startDateStr)
 	if err != nil {
@@ -38,7 +36,6 @@ func ValidateDateRange(startDateStr, endDateStr string) (time.Time, time.Time, e
 	return startDate, endDate, nil
 }
 
-// ValidateCapacity validates class capacity is positive
 func ValidateCapacity(capacity int) error {
 	if capacity <= 0 {
 		return errors.New("capacity must be a positive integer")
@@ -46,7 +43,6 @@ func ValidateCapacity(capacity int) error {
 	return nil
 }
 
-// ValidateName validates that a name is not empty
 func ValidateName(name string) error {
 	if name == "" {
 		return errors.New("name is required")
@@ -54,7 +50,6 @@ func ValidateName(name string) error {
 	return nil
 }
 
-// ValidateClassName validates that a class name is not empty
 func ValidateClassName(className string) error {
 	if className == "" {
 		return errors.New("class name is required")
@@ -62,7 +57,6 @@ func ValidateClassName(className string) error {
 	return nil
 }
 
-// ValidateBookingDate validates that a booking date is valid and not in the past
 func ValidateBookingDate(dateStr string) (time.Time, error) {
 	date, err := ValidateDate(dateStr)
 	if err != nil {

@@ -1,5 +1,3 @@
-// File: internal/models/class.go
-
 package models
 
 import (
@@ -9,7 +7,6 @@ import (
 	"github.com/google/uuid"
 )
 
-// Class represents a class offered by a studio
 type Class struct {
 	ID        string    `json:"id"`
 	ClassName string    `json:"className"`
@@ -19,7 +16,6 @@ type Class struct {
 	CreatedAt time.Time `json:"createdAt"`
 }
 
-// ClassInput represents the input data for creating a class
 type ClassInput struct {
 	ClassName string `json:"className" binding:"required"`
 	StartDate string `json:"startDate" binding:"required"`
@@ -27,7 +23,6 @@ type ClassInput struct {
 	Capacity  int    `json:"capacity" binding:"required,min=1"`
 }
 
-// Validate validates the class input data
 func (ci *ClassInput) Validate() error {
 	if ci.ClassName == "" {
 		return errors.New("className is required")
@@ -54,7 +49,6 @@ func (ci *ClassInput) Validate() error {
 	return nil
 }
 
-// NewClass creates a new Class instance from ClassInput
 func NewClass(input ClassInput) (*Class, error) {
 	if err := input.Validate(); err != nil {
 		return nil, err
@@ -73,9 +67,8 @@ func NewClass(input ClassInput) (*Class, error) {
 	}, nil
 }
 
-// IsDateInRange checks if a given date falls within the class's date range
 func (c *Class) IsDateInRange(date time.Time) bool {
-	// Normalize dates by setting time to midnight
+
 	date = time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, time.UTC)
 	startDate := time.Date(c.StartDate.Year(), c.StartDate.Month(), c.StartDate.Day(), 0, 0, 0, 0, time.UTC)
 	endDate := time.Date(c.EndDate.Year(), c.EndDate.Month(), c.EndDate.Day(), 0, 0, 0, 0, time.UTC)

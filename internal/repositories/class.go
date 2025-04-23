@@ -1,5 +1,3 @@
-// File: internal/repositories/class.go
-
 package repositories
 
 import (
@@ -9,7 +7,6 @@ import (
 	"time"
 )
 
-// ClassRepository defines the interface for class storage operations
 type ClassRepository interface {
 	Create(class *models.Class) error
 	GetAll() []*models.Class
@@ -17,20 +14,17 @@ type ClassRepository interface {
 	GetByDate(date time.Time) []*models.Class
 }
 
-// InMemoryClassRepository implements ClassRepository with in-memory storage
 type InMemoryClassRepository struct {
 	classes map[string]*models.Class
 	mutex   sync.RWMutex
 }
 
-// NewClassRepository creates a new instance of InMemoryClassRepository
 func NewClassRepository() ClassRepository {
 	return &InMemoryClassRepository{
 		classes: make(map[string]*models.Class),
 	}
 }
 
-// Create adds a new class to the repository
 func (r *InMemoryClassRepository) Create(class *models.Class) error {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
@@ -39,7 +33,6 @@ func (r *InMemoryClassRepository) Create(class *models.Class) error {
 	return nil
 }
 
-// GetAll returns all classes from the repository
 func (r *InMemoryClassRepository) GetAll() []*models.Class {
 	r.mutex.RLock()
 	defer r.mutex.RUnlock()
@@ -51,7 +44,6 @@ func (r *InMemoryClassRepository) GetAll() []*models.Class {
 	return classes
 }
 
-// GetByID returns a class by its ID
 func (r *InMemoryClassRepository) GetByID(id string) (*models.Class, error) {
 	r.mutex.RLock()
 	defer r.mutex.RUnlock()
