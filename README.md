@@ -40,7 +40,7 @@ glofox-backend/
   ├── docs/                      # Swagger documentation
   ├── internal/
   │   ├── api/
-  │   │   ├── handlers/          # HTTP request handlers
+  │   │   ├── handlers/          # HTTP request handlers + testing files of both handlers
   │   │   ├── middleware/        # HTTP middleware
   │   │   ├── responses/         # API response utilities
   │   │   └── router.go          # API routes configuration
