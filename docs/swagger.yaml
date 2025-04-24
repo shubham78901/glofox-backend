@@ -17,14 +17,14 @@ definitions:
     properties:
       classId:
         type: string
-      className:
-        type: string
       date:
+        type: string
+      name:
         type: string
     required:
     - classId
-    - className
     - date
+    - name
     type: object
   models.Class:
     properties:

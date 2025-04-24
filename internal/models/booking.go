@@ -18,7 +18,7 @@ type Booking struct {
 }
 
 type BookingInput struct {
-	Name    string `json:"className" binding:"required"`
+	Name    string `json:"name" binding:"required"`
 	Date    string `json:"date" binding:"required"`
 	ClassID string `json:"classId" binding:"required"`
 }

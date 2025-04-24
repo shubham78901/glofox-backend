@@ -325,17 +325,17 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "classId",
-                "className",
-                "date"
+                "date",
+                "name"
             ],
             "properties": {
                 "classId": {
                     "type": "string"
                 },
-                "className": {
+                "date": {
                     "type": "string"
                 },
-                "date": {
+                "name": {
                     "type": "string"
                 }
             }
