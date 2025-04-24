@@ -1,5 +1,3 @@
-// File: internal/api/middleware/middleware.go
-
 package middleware
 
 import (
@@ -9,13 +7,11 @@ import (
 	"time"
 )
 
-// Response represents a standard API response
 type Response struct {
 	Success bool   `json:"success"`
 	Message string `json:"message"`
 }
 
-// Logger is a middleware that logs request details
 func Logger(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
@@ -29,7 +25,6 @@ func Logger(next http.Handler) http.Handler {
 	})
 }
 
-// ErrorHandler is a middleware that catches panics and returns 500 errors
 func ErrorHandler(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
