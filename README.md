@@ -214,7 +214,3 @@ make run
 - **Validation**: Input validation is performed at the model level before data persistence.
 - **Error Handling**: Consistent error responses are provided through the responses package.
 - **Dependency Injection**: Handlers are initialized with their required repositories, making testing and future changes easier.
-
-## License
-
-This project is licensed under the MIT License.
