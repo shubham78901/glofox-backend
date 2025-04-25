@@ -1,5 +1,5 @@
 // File: internal/api/handlers/booking.go
-
+// mockgen -source=internal/repositories/class.go -destination=internal/mocks/mock_class_repository.go -package=mocks
 package handlers
 
 import (
