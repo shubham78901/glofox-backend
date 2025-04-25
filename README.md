@@ -7,68 +7,87 @@
 <img width="1470" alt="Screenshot 2025-04-24 at 11 01 57 AM" src="https://github.com/user-attachments/assets/e654f86c-a526-455d-99b0-6bf93cc92475" />
 
 
-
-
 # Glofox Studio API
 
-A backend API for managing fitness studio classes and bookings.
+A RESTful API for managing fitness studio classes and bookings, built with Go.
 
 ## Overview
 
-This project provides a RESTful API for fitness studio management, allowing:
-- Creation and management of fitness classes
-- Member booking management
-- Class schedule exploration
+This backend service provides endpoints for fitness studio management, allowing studio owners to:
+
+- Create and manage recurring fitness classes
+- Handle member bookings and attendance
+- Track class capacity and availability
+- Filter classes by date ranges
 
 ## Technology Stack
 
 - **Go** - Core programming language
-- **Gorilla Mux** - HTTP router and URL matcher
-- **Swagger/OpenAPI** - API documentation
-- **testify** - Testing framework
-- **JSON** - Data interchange format
-- **Docker** - Containerization
+- **Gorilla Mux** - HTTP routing and request handling
+- **Swagger/OpenAPI** - API documentation and specification
+- **Testify** - Testing framework for assertions and mocks
+- **GoMock** - Mocking framework for unit tests
+- **UUID** - Unique identifier generation
+- **Docker** - Containerization for deployment
 - **Make** - Build automation
 
 ## Project Structure
 
 ```
 glofox-backend/
-  ├── cmd/
-  │   └── api/
-  │       └── main.go            # Application entry point
-  ├── docs/                      # Swagger documentation
-  ├── internal/
-  │   ├── api/
-  │   │   ├── handlers/          # HTTP request handlers + testing files of both handlers
-  │   │   ├── middleware/        # HTTP middleware
-  │   │   ├── responses/         # API response utilities
-  │   │   └── router.go          # API routes configuration
-  │   ├── models/                # Domain models + Validation utilities
-  │   ├── repositories/          # Data access layer
-  │ 
-  ├── Makefile                   # Build and deployment commands
-  ├── Dockerfile                 # Docker container definition
-  └── README.md                  # This file
+├── cmd/
+│   └── api/
+│       └── main.go              # Application entry point
+├── docs/                        # Swagger documentation
+├── internal/
+│   ├── api/
+│   │   ├── handlers/            # HTTP request handlers
+│   │   │   ├── booking.go       # Booking handler implementation
+│   │   │   ├── booking_test.go  # Booking handler tests
+│   │   │   ├── class.go         # Class handler implementation
+│   │   │   └── class_test.go    # Class handler tests
+│   │   ├── middleware/          # HTTP middleware
+│   │   │   └── middleware.go    # Logger and error middleware
+│   │   ├── responses/           # API response utilities
+│   │   │   └── responses.go     # JSON response formatting
+│   │   ├── router.go            # API route configuration
+│   │   └── swagger.go           # Swagger setup
+│   ├── models/                  # Domain models
+│   │   ├── booking.go           # Booking model and validation
+│   │   └── class.go             # Class model and validation
+│   ├── mocks/                   # Auto-generated test mocks
+│   │   ├── mock_booking_repository.go
+│   │   └── mock_class_repository.go
+│   └── repositories/            # Data access layer
+│       ├── booking.go           # Booking repository implementation
+│       └── class.go             # Class repository implementation
+├── pkg/                         # Shared packages
+├── Makefile                     # Build and deployment commands
+├── Dockerfile                   # Docker container definition
+└── README.md                    # Project documentation
 ```
 
 ## API Endpoints
 
 ### Classes
 
-- `POST /classes` - Create a new fitness class
-- `GET /classes` - Get all classes (with optional date filter)
-- `GET /classes/{id}` - Get a specific class by ID
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/classes` | Create a new fitness class |
+| `GET`  | `/classes` | Get all classes (with optional date filter) |
+| `GET`  | `/classes/{id}` | Get a specific class by ID |
 
 ### Bookings
 
-- `POST /bookings` - Create a new booking
-- `GET /bookings` - Get all bookings
-- `GET /bookings/{id}` - Get a specific booking by ID
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/bookings` | Create a new booking |
+| `GET`  | `/bookings` | Get all bookings |
+| `GET`  | `/bookings/{id}` | Get a specific booking by ID |
 
 ## API Documentation
 
-The API is documented using Swagger/OpenAPI 2.0. Access the documentation at:
+The API is documented using Swagger/OpenAPI. Once the application is running, you can access the documentation at:
 
 ```
 http://localhost:8080/swagger/index.html
@@ -112,6 +131,10 @@ make test-all
 ### Manual Setup
 
 ```bash
+# Clone the repository
+git clone https://github.com/yourusername/glofox-backend.git
+cd glofox-backend
+
 # Set port (default is 8080)
 export PORT=8080
 
@@ -121,13 +144,17 @@ go run cmd/api/main.go
 
 ## Testing
 
+The application includes comprehensive unit tests for the handlers and models:
+
 ```bash
+# Run all tests
+go test ./...
 
 # Run specific tests
 go test ./internal/api/handlers -v
 ```
 
-## Sample Requests
+## Sample API Requests
 
 ### Create a Class
 
@@ -140,6 +167,12 @@ curl -X POST http://localhost:8080/classes \
     "endDate": "2023-05-31",
     "capacity": 15
   }'
+```
+
+### Get Classes by Date
+
+```bash
+curl -X GET "http://localhost:8080/classes?date=2023-05-15"
 ```
 
 ### Create a Booking
@@ -156,22 +189,31 @@ curl -X POST http://localhost:8080/bookings \
 
 ## Docker Support
 
-The application can be run in a Docker container. The Makefile provides convenient commands for building and running the Docker image:
+The application can be run in a Docker container. The Dockerfile provides a multi-stage build for optimized container size:
 
 ```bash
 # Build Docker image
-make build
+docker build -t glofox-api .
 
 # Run in Docker container
+docker run -p 8080:8080 glofox-api
+```
+
+Alternatively, you can use the provided Make commands:
+
+```bash
+# Build and run with Docker
+make build
 make run
 ```
 
-Alternatively, you can use docker-compose:
+## Design Decisions
 
-```bash
-# Start all services
-make compose-up
-```
+- **In-memory Repository Pattern**: The application uses in-memory repositories for simplicity, but the interface design allows for easy substitution with a database implementation.
+- **Thread-safe Operations**: Repository implementations use mutex locks to ensure thread safety for concurrent operations.
+- **Validation**: Input validation is performed at the model level before data persistence.
+- **Error Handling**: Consistent error responses are provided through the responses package.
+- **Dependency Injection**: Handlers are initialized with their required repositories, making testing and future changes easier.
 
 ## License
 

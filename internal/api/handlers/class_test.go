@@ -8,39 +8,19 @@ import (
 	"testing"
 	"time"
 
+	"glofox-backend/internal/mocks"
 	"glofox-backend/internal/models"
 
+	"github.com/golang/mock/gomock"
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 )
 
-type MockClassRepository struct {
-	mock.Mock
-}
-
-func (m *MockClassRepository) Create(class *models.Class) error {
-	args := m.Called(class)
-	return args.Error(0)
-}
-
-func (m *MockClassRepository) GetAll() []*models.Class {
-	args := m.Called()
-	return args.Get(0).([]*models.Class)
-}
-
-func (m *MockClassRepository) GetByID(id string) (*models.Class, error) {
-	args := m.Called(id)
-	return args.Get(0).(*models.Class), args.Error(1)
-}
-
-func (m *MockClassRepository) GetByDate(date time.Time) []*models.Class {
-	args := m.Called(date)
-	return args.Get(0).([]*models.Class)
-}
-
 func TestCreateClass(t *testing.T) {
-	mockRepo := new(MockClassRepository)
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockRepo := mocks.NewMockClassRepository(ctrl)
 	handler := NewClassHandler(mockRepo)
 
 	classInput := models.ClassInput{
@@ -51,7 +31,7 @@ func TestCreateClass(t *testing.T) {
 	}
 	requestBody, _ := json.Marshal(classInput)
 
-	mockRepo.On("Create", mock.AnythingOfType("*models.Class")).Return(nil)
+	mockRepo.EXPECT().Create(gomock.Any()).Return(nil)
 
 	req := httptest.NewRequest("POST", "/classes", bytes.NewBuffer(requestBody))
 	req.Header.Set("Content-Type", "application/json")
@@ -60,15 +40,15 @@ func TestCreateClass(t *testing.T) {
 	handler.CreateClass(recorder, req)
 
 	assert.Equal(t, http.StatusCreated, recorder.Code)
-
-	mockRepo.AssertExpectations(t)
 }
 
 func TestGetClassByID(t *testing.T) {
-	mockRepo := new(MockClassRepository)
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockRepo := mocks.NewMockClassRepository(ctrl)
 	handler := NewClassHandler(mockRepo)
 
-	// Create a mock class to return
 	mockClass := &models.Class{
 		ID:        "test-id",
 		ClassName: "Test Class",
@@ -78,62 +58,35 @@ func TestGetClassByID(t *testing.T) {
 		CreatedAt: time.Now(),
 	}
 
-	// Setup the mock
-	mockRepo.On("GetByID", "test-id").Return(mockClass, nil)
+	mockRepo.EXPECT().GetByID("test-id").Return(mockClass, nil)
 
-	// Create a request
 	req := httptest.NewRequest("GET", "/classes/test-id", nil)
 	req = mux.SetURLVars(req, map[string]string{"id": "test-id"})
 	recorder := httptest.NewRecorder()
 
-	// Call the handler
-
 	handler.GetClassByID(recorder, req)
 
-	// Assert the response
 	assert.Equal(t, http.StatusOK, recorder.Code)
-
-	// Verify mock expectations
-	mockRepo.AssertExpectations(t)
 }
 
 func TestGetAllClasses(t *testing.T) {
-	mockRepo := new(MockClassRepository)
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockRepo := mocks.NewMockClassRepository(ctrl)
 	handler := NewClassHandler(mockRepo)
 
-	// Create mock classes
 	mockClasses := []*models.Class{
-		{
-			ID:        "test-id-1",
-			ClassName: "Test Class 1",
-			StartDate: time.Now(),
-			EndDate:   time.Now().AddDate(0, 0, 10),
-			Capacity:  10,
-			CreatedAt: time.Now(),
-		},
-		{
-			ID:        "test-id-2",
-			ClassName: "Test Class 2",
-			StartDate: time.Now(),
-			EndDate:   time.Now().AddDate(0, 0, 10),
-			Capacity:  15,
-			CreatedAt: time.Now(),
-		},
+		{ID: "test-id-1", ClassName: "Class 1", StartDate: time.Now(), EndDate: time.Now(), Capacity: 10, CreatedAt: time.Now()},
+		{ID: "test-id-2", ClassName: "Class 2", StartDate: time.Now(), EndDate: time.Now(), Capacity: 12, CreatedAt: time.Now()},
 	}
 
-	// Setup the mock
-	mockRepo.On("GetAll").Return(mockClasses)
+	mockRepo.EXPECT().GetAll().Return(mockClasses)
 
-	// Create a request
 	req := httptest.NewRequest("GET", "/classes", nil)
 	recorder := httptest.NewRecorder()
 
-	// Call the handler
 	handler.GetAllClasses(recorder, req)
 
-	// Assert the response
 	assert.Equal(t, http.StatusOK, recorder.Code)
-
-	// Verify mock expectations
-	mockRepo.AssertExpectations(t)
 }
