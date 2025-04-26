@@ -1,6 +1,5 @@
 package handlers
 
-// mockgen -source=internal/repositories/booking.go -destination=internal/mocks/mock_booking_repository.go -package=mocks
 import (
 	"bytes"
 	"encoding/json"
@@ -91,3 +90,7 @@ func TestGetAllClasses(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, recorder.Code)
 }
+
+//remember for generating mocks
+
+// mockgen -source=internal/repositories/booking.go -destination=internal/mocks/mock_booking_repository.go -package=mocks
