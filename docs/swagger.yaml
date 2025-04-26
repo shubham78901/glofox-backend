@@ -7,16 +7,29 @@ definitions:
       message:
         type: string
     type: object
-  controllers.SuccessResponse:
+  models.BookingInput:
+    description: Booking creation input
     properties:
-      message:
+      class_id:
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
-      status:
+      date:
+        example: "2025-04-26"
         type: string
+      trainee_name:
+        example: John Doe
+        type: string
+    required:
+    - class_id
+    - date
+    - trainee_name
     type: object
-  models.Booking:
-    description: Booking information
+  models.BookingRes:
+    description: Booking response information
     properties:
+      booking_uuid:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
       class_id:
         example: 550e8400-e29b-41d4-a716-446655440000
         type: string
@@ -24,15 +37,11 @@ definitions:
         example: "2025-04-26T00:00:00Z"
         format: date-time
         type: string
-      status:
-        example: confirmed
+      date:
+        example: "2025-04-26"
         type: string
-      updated_at:
-        example: "2025-04-26T00:00:00Z"
-        format: date-time
-        type: string
-      user_id:
-        example: user123
+      trainee_name:
+        example: John Doe
         type: string
     type: object
   models.Class:
@@ -101,7 +110,7 @@ info:
 paths:
   /bookings:
     get:
-      description: Get all bookings
+      description: Retrieve a list of all bookings with their details
       produces:
       - application/json
       responses:
@@ -109,7 +118,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/models.Booking'
+              $ref: '#/definitions/models.BookingRes'
             type: array
         "500":
           description: Internal Server Error
@@ -121,23 +130,31 @@ paths:
     post:
       consumes:
       - application/json
-      description: Create a new booking for a class
+      description: Create a booking for a fitness class on a specific date
       parameters:
       - description: Booking information
         in: body
         name: booking
         required: true
         schema:
-          $ref: '#/definitions/models.Booking'
+          $ref: '#/definitions/models.BookingInput'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/models.Booking'
+            $ref: '#/definitions/models.BookingRes'
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controllers.ErrorResponse'
+        "409":
+          description: Class is full or not available on requested date
           schema:
             $ref: '#/definitions/controllers.ErrorResponse'
         "500":
@@ -148,51 +165,21 @@ paths:
       tags:
       - bookings
   /bookings/{id}:
-    delete:
-      description: Delete a booking by its ID
-      parameters:
-      - description: Booking ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/controllers.SuccessResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/controllers.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/controllers.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/controllers.ErrorResponse'
-      summary: Delete a booking
-      tags:
-      - bookings
     get:
-      description: Get a booking by its ID
+      description: Get details of a specific booking by its UUID
       parameters:
-      - description: Booking ID
+      - description: Booking UUID
         in: path
         name: id
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.Booking'
+            $ref: '#/definitions/models.BookingRes'
         "404":
           description: Not Found
           schema:
@@ -201,78 +188,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/controllers.ErrorResponse'
-      summary: Get a booking by ID
-      tags:
-      - bookings
-    put:
-      consumes:
-      - application/json
-      description: Update a booking's information
-      parameters:
-      - description: Booking ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Booking information
-        in: body
-        name: booking
-        required: true
-        schema:
-          $ref: '#/definitions/models.Booking'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.Booking'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/controllers.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/controllers.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/controllers.ErrorResponse'
-      summary: Update a booking
-      tags:
-      - bookings
-  /bookings/{id}/cancel:
-    put:
-      consumes:
-      - application/json
-      description: Cancel an existing booking
-      parameters:
-      - description: Booking ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/controllers.SuccessResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/controllers.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/controllers.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/controllers.ErrorResponse'
-      summary: Cancel a booking
+      summary: Get booking details
       tags:
       - bookings
   /classes:
@@ -330,13 +246,13 @@ paths:
       - classes
   /classes/{classId}/bookings:
     get:
-      description: Get all bookings for a specific class
+      description: Retrieve all bookings for a specific class
       parameters:
-      - description: Class ID
+      - description: Class UUID
         in: path
         name: classId
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
@@ -344,7 +260,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/models.Booking'
+              $ref: '#/definitions/models.BookingRes'
             type: array
         "400":
           description: Bad Request

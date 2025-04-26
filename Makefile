@@ -1,50 +1,27 @@
-.PHONY: build run clean test docker-build docker-up docker-down swagger
+.PHONY: run clean build up down migrate
 
-# Run the application (stops previous containers, builds and runs in Docker)
+# Run the application
 run:
-	docker-compose down
-	docker-compose up --build
-
-# Clean Docker resources
-clean:
 	docker-compose down -v
-	docker system prune -f
+	docker-compose build
+	docker-compose up
 
-# Run tests in a Docker container
-test:
-	docker-compose run --rm app go test -v ./...
+# Clean containers and networks
+clean:
+	docker-compose down
 
-# Format code in a Docker container
-fmt:
-	docker-compose run --rm app go fmt ./...
-
-# Generate swagger documentation in a Docker container
-swagger:
-	docker-compose run --rm app swag init -g main.go -o ./docs
-
-# Build Docker image
+# Build containers
 build:
 	docker-compose build
 
-# Run Docker containers in detached mode
+# Start containers in background
 up:
 	docker-compose up -d
 
-# Stop Docker containers
+# Stop containers
 down:
 	docker-compose down
 
-# Show logs for running containers
-logs:
-	docker-compose logs -f
-
-# Restart services
-restart:
-	docker-compose restart
-
-# Show running containers
-ps:
-	docker-compose ps
-
-# All-in-one command to restart fresh
-all: clean build up
+# Run migrations manually
+migrate:
+	docker-compose run --rm app migrate -path ./migrations -database $$DB_URL up

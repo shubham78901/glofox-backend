@@ -25,7 +25,7 @@ const docTemplate = `{
     "paths": {
         "/bookings": {
             "get": {
-                "description": "Get all bookings",
+                "description": "Retrieve a list of all bookings with their details",
                 "produces": [
                     "application/json"
                 ],
@@ -39,7 +39,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/models.Booking"
+                                "$ref": "#/definitions/models.BookingRes"
                             }
                         }
                     },
@@ -52,7 +52,7 @@ const docTemplate = `{
                 }
             },
             "post": {
-                "description": "Create a new booking for a class",
+                "description": "Create a booking for a fitness class on a specific date",
                 "consumes": [
                     "application/json"
                 ],
@@ -70,7 +70,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.Booking"
+                            "$ref": "#/definitions/models.BookingInput"
                         }
                     }
                 ],
@@ -78,11 +78,23 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/models.Booking"
+                            "$ref": "#/definitions/models.BookingRes"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Class is full or not available on requested date",
                         "schema": {
                             "$ref": "#/definitions/controllers.ErrorResponse"
                         }
@@ -98,18 +110,18 @@ const docTemplate = `{
         },
         "/bookings/{id}": {
             "get": {
-                "description": "Get a booking by its ID",
+                "description": "Get details of a specific booking by its UUID",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "bookings"
                 ],
-                "summary": "Get a booking by ID",
+                "summary": "Get booking details",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Booking ID",
+                        "type": "string",
+                        "description": "Booking UUID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -119,159 +131,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.Booking"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/controllers.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/controllers.ErrorResponse"
-                        }
-                    }
-                }
-            },
-            "put": {
-                "description": "Update a booking's information",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "bookings"
-                ],
-                "summary": "Update a booking",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Booking ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Booking information",
-                        "name": "booking",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.Booking"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.Booking"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/controllers.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/controllers.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/controllers.ErrorResponse"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "description": "Delete a booking by its ID",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "bookings"
-                ],
-                "summary": "Delete a booking",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Booking ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/controllers.SuccessResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/controllers.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/controllers.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/controllers.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/bookings/{id}/cancel": {
-            "put": {
-                "description": "Cancel an existing booking",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "bookings"
-                ],
-                "summary": "Cancel a booking",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Booking ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/controllers.SuccessResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/controllers.ErrorResponse"
+                            "$ref": "#/definitions/models.BookingRes"
                         }
                     },
                     "404": {
@@ -372,7 +232,7 @@ const docTemplate = `{
         },
         "/classes/{classId}/bookings": {
             "get": {
-                "description": "Get all bookings for a specific class",
+                "description": "Retrieve all bookings for a specific class",
                 "produces": [
                     "application/json"
                 ],
@@ -382,8 +242,8 @@ const docTemplate = `{
                 "summary": "Get bookings by class",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Class ID",
+                        "type": "string",
+                        "description": "Class UUID",
                         "name": "classId",
                         "in": "path",
                         "required": true
@@ -395,7 +255,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/models.Booking"
+                                "$ref": "#/definitions/models.BookingRes"
                             }
                         }
                     },
@@ -475,21 +335,37 @@ const docTemplate = `{
                 }
             }
         },
-        "controllers.SuccessResponse": {
+        "models.BookingInput": {
+            "description": "Booking creation input",
             "type": "object",
+            "required": [
+                "class_id",
+                "date",
+                "trainee_name"
+            ],
             "properties": {
-                "message": {
-                    "type": "string"
+                "class_id": {
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
-                "status": {
-                    "type": "string"
+                "date": {
+                    "type": "string",
+                    "example": "2025-04-26"
+                },
+                "trainee_name": {
+                    "type": "string",
+                    "example": "John Doe"
                 }
             }
         },
-        "models.Booking": {
-            "description": "Booking information",
+        "models.BookingRes": {
+            "description": "Booking response information",
             "type": "object",
             "properties": {
+                "booking_uuid": {
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
                 "class_id": {
                     "type": "string",
                     "example": "550e8400-e29b-41d4-a716-446655440000"
@@ -499,18 +375,13 @@ const docTemplate = `{
                     "format": "date-time",
                     "example": "2025-04-26T00:00:00Z"
                 },
-                "status": {
+                "date": {
                     "type": "string",
-                    "example": "confirmed"
+                    "example": "2025-04-26"
                 },
-                "updated_at": {
+                "trainee_name": {
                     "type": "string",
-                    "format": "date-time",
-                    "example": "2025-04-26T00:00:00Z"
-                },
-                "user_id": {
-                    "type": "string",
-                    "example": "user123"
+                    "example": "John Doe"
                 }
             }
         },

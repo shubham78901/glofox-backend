@@ -59,9 +59,6 @@ func main() {
 	apiRouter.HandleFunc("/bookings", bookingController.CreateBooking).Methods("POST")
 	apiRouter.HandleFunc("/bookings", bookingController.GetAllBookings).Methods("GET")
 	apiRouter.HandleFunc("/bookings/{id}", bookingController.GetBooking).Methods("GET")
-	apiRouter.HandleFunc("/bookings/{id}", bookingController.UpdateBooking).Methods("PUT")
-	apiRouter.HandleFunc("/bookings/{id}", bookingController.DeleteBooking).Methods("DELETE")
-	apiRouter.HandleFunc("/bookings/{id}/cancel", bookingController.CancelBooking).Methods("PUT")
 
 	// Swagger documentation - using more explicit configuration
 	// Swagger documentation
