@@ -852,7 +852,8 @@ var SwaggerInfo = &swag.Spec{
 	Description:      "Glofox Backend API service",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
-
+	LeftDelim:        "{{",
+	RightDelim:       "}}",
 }
 
 func init() {

@@ -13,7 +13,8 @@ import (
 	"github.com/joho/godotenv"
 
 	httpSwagger "github.com/swaggo/http-swagger"
-	_ "github.com/swaggo/http-swagger/example/go-chi/docs"
+	// Update this import path to match your project structure
+	_ "glofox-backend/docs"
 )
 
 // @title Glofox API
@@ -53,8 +54,13 @@ func main() {
 	// Add middleware
 	r.Use(controllers.LoggingMiddleware)
 
-	// Swagger documentation
-	r.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
+	// Configure Swagger UI - Correctly using http-swagger
+	r.PathPrefix("/swagger/").Handler(httpSwagger.Handler(
+		httpSwagger.URL("/swagger/doc.json"), // The URL pointing to API definition
+		httpSwagger.DeepLinking(true),
+		httpSwagger.DocExpansion("none"),
+		httpSwagger.DomID("swagger-ui"),
+	))
 
 	// Static files (if needed)
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
