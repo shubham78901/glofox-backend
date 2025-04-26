@@ -162,7 +162,7 @@ go test ./internal/api/handlers -v
 curl -X POST http://localhost:8080/classes \
   -H "Content-Type: application/json" \
   -d '{
-    "className": "Yoga Basics",
+    "className": "Cricket practise",
     "startDate": "2023-05-01",
     "endDate": "2023-05-31",
     "capacity": 15
@@ -181,7 +181,7 @@ curl -X GET "http://localhost:8080/classes?date=2023-05-15"
 curl -X POST http://localhost:8080/bookings \
   -H "Content-Type: application/json" \
   -d '{
-    "name": "John Doe",
+    "name": "Shubham Gautam",
     "date": "2023-05-15",
     "classId": "class-id-here"
   }'
