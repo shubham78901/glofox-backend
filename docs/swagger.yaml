@@ -15,10 +15,94 @@ definitions:
         type: string
     type: object
   models.Booking:
+    description: Booking information for classes
+    properties:
+      booked_at:
+        example: "2025-04-26T07:38:52Z"
+        type: string
+      class_id:
+        example: 2
+        type: integer
+      created_at:
+        example: "2025-04-26T07:38:52Z"
+        type: string
+      id:
+        description: Standard gorm.Model fields
+        example: 1
+        type: integer
+      status:
+        example: confirmed
+        type: string
+      updated_at:
+        example: "2025-04-26T07:38:52Z"
+        type: string
+      user_id:
+        description: Custom booking fields
+        example: 1
+        type: integer
     type: object
   models.Class:
+    description: Fitness class information
+    properties:
+      capacity:
+        example: 20
+        type: integer
+      created_at:
+        example: "2025-04-26T07:38:52Z"
+        type: string
+      description:
+        example: A flowing yoga class for all levels
+        type: string
+      end_time:
+        example: "2025-04-30T19:00:00Z"
+        type: string
+      id:
+        description: Standard gorm.Model fields
+        example: 1
+        type: integer
+      name:
+        description: Custom class fields
+        example: Yoga Flow
+        type: string
+      start_time:
+        example: "2025-04-30T18:00:00Z"
+        type: string
+      studio_id:
+        example: 1
+        type: integer
+      updated_at:
+        example: "2025-04-26T07:38:52Z"
+        type: string
     type: object
   models.Studio:
+    description: Fitness studio information
+    properties:
+      address:
+        example: 123 Main Street, City
+        type: string
+      created_at:
+        example: "2025-04-26T07:38:52Z"
+        type: string
+      description:
+        example: A premium fitness studio in downtown
+        type: string
+      email:
+        example: info@glofoxstudio.com
+        type: string
+      id:
+        description: Standard gorm.Model fields
+        example: 1
+        type: integer
+      name:
+        description: Custom studio fields
+        example: Glofox Fitness Studio
+        type: string
+      phone:
+        example: +1-123-456-7890
+        type: string
+      updated_at:
+        example: "2025-04-26T07:38:52Z"
+        type: string
     type: object
 host: localhost:8080
 info:
@@ -178,7 +262,9 @@ paths:
       - bookings
   /bookings/{id}/cancel:
     put:
-      description: Cancel a booking by its ID
+      consumes:
+      - application/json
+      description: Cancel an existing booking
       parameters:
       - description: Booking ID
         in: path

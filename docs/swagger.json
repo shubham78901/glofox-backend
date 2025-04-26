@@ -235,7 +235,10 @@
         },
         "/bookings/{id}/cancel": {
             "put": {
-                "description": "Cancel a booking by its ID",
+                "description": "Cancel an existing booking",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -825,13 +828,124 @@
             }
         },
         "models.Booking": {
-            "type": "object"
+            "description": "Booking information for classes",
+            "type": "object",
+            "properties": {
+                "booked_at": {
+                    "type": "string",
+                    "example": "2025-04-26T07:38:52Z"
+                },
+                "class_id": {
+                    "type": "integer",
+                    "example": 2
+                },
+                "created_at": {
+                    "type": "string",
+                    "example": "2025-04-26T07:38:52Z"
+                },
+                "id": {
+                    "description": "Standard gorm.Model fields",
+                    "type": "integer",
+                    "example": 1
+                },
+                "status": {
+                    "type": "string",
+                    "example": "confirmed"
+                },
+                "updated_at": {
+                    "type": "string",
+                    "example": "2025-04-26T07:38:52Z"
+                },
+                "user_id": {
+                    "description": "Custom booking fields",
+                    "type": "integer",
+                    "example": 1
+                }
+            }
         },
         "models.Class": {
-            "type": "object"
+            "description": "Fitness class information",
+            "type": "object",
+            "properties": {
+                "capacity": {
+                    "type": "integer",
+                    "example": 20
+                },
+                "created_at": {
+                    "type": "string",
+                    "example": "2025-04-26T07:38:52Z"
+                },
+                "description": {
+                    "type": "string",
+                    "example": "A flowing yoga class for all levels"
+                },
+                "end_time": {
+                    "type": "string",
+                    "example": "2025-04-30T19:00:00Z"
+                },
+                "id": {
+                    "description": "Standard gorm.Model fields",
+                    "type": "integer",
+                    "example": 1
+                },
+                "name": {
+                    "description": "Custom class fields",
+                    "type": "string",
+                    "example": "Yoga Flow"
+                },
+                "start_time": {
+                    "type": "string",
+                    "example": "2025-04-30T18:00:00Z"
+                },
+                "studio_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "updated_at": {
+                    "type": "string",
+                    "example": "2025-04-26T07:38:52Z"
+                }
+            }
         },
         "models.Studio": {
-            "type": "object"
+            "description": "Fitness studio information",
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string",
+                    "example": "123 Main Street, City"
+                },
+                "created_at": {
+                    "type": "string",
+                    "example": "2025-04-26T07:38:52Z"
+                },
+                "description": {
+                    "type": "string",
+                    "example": "A premium fitness studio in downtown"
+                },
+                "email": {
+                    "type": "string",
+                    "example": "info@glofoxstudio.com"
+                },
+                "id": {
+                    "description": "Standard gorm.Model fields",
+                    "type": "integer",
+                    "example": 1
+                },
+                "name": {
+                    "description": "Custom studio fields",
+                    "type": "string",
+                    "example": "Glofox Fitness Studio"
+                },
+                "phone": {
+                    "type": "string",
+                    "example": "+1-123-456-7890"
+                },
+                "updated_at": {
+                    "type": "string",
+                    "example": "2025-04-26T07:38:52Z"
+                }
+            }
         }
     }
 }

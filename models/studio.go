@@ -2,22 +2,33 @@ package models
 
 import (
 	"time"
-
-	"gorm.io/gorm"
 )
 
-// Studio represents a fitness studio
-// @Description Studio model for fitness businesses
+// Studio represents a fitness studio that offers classes
+// @Description Fitness studio information
 type Studio struct {
-	gorm.Model        // Embedded gorm.Model
-	ID         uint   `json:"id" gorm:"primaryKey" swaggerignore:"true"`
-	Name       string `json:"name" gorm:"not null"`
-	Address    string `json:"address" gorm:"not null"`
-	Email      string `json:"email" gorm:"not null"`
-	Phone      string `json:"phone" gorm:"not null"`
-	// Add swaggerignore to fields that cause recursion issues
-	Classes   []Class    `json:"classes,omitempty" gorm:"foreignKey:StudioID" swaggerignore:"true"`
-	CreatedAt time.Time  `json:"created_at" swaggerignore:"true"`
-	UpdatedAt time.Time  `json:"updated_at" swaggerignore:"true"`
-	DeletedAt *time.Time `json:"deleted_at,omitempty" swaggerignore:"true"`
+	// Standard gorm.Model fields
+	ID        uint       `json:"id" gorm:"primaryKey" example:"1"`
+	CreatedAt time.Time  `json:"created_at" example:"2025-04-26T07:38:52Z"`
+	UpdatedAt time.Time  `json:"updated_at" example:"2025-04-26T07:38:52Z"`
+	DeletedAt *time.Time `json:"deleted_at,omitempty" gorm:"index" swaggerignore:"true"`
+
+	// Custom studio fields
+	Name        string  `json:"name" example:"Glofox Fitness Studio"`
+	Description string  `json:"description" example:"A premium fitness studio in downtown"`
+	Address     string  `json:"address" example:"123 Main Street, City"`
+	Phone       string  `json:"phone" example:"+1-123-456-7890"`
+	Email       string  `json:"email" example:"info@glofoxstudio.com"`
+	Classes     []Class `json:"classes,omitempty" gorm:"foreignKey:StudioID" swaggerignore:"true"`
+}
+
+// NewStudio creates a new studio
+func NewStudio(name, description, address, phone, email string) *Studio {
+	return &Studio{
+		Name:        name,
+		Description: description,
+		Address:     address,
+		Phone:       phone,
+		Email:       email,
+	}
 }

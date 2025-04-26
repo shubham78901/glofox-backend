@@ -183,38 +183,46 @@ func (bc *BookingController) UpdateBooking(w http.ResponseWriter, r *http.Reques
 	respondWithJSON(w, http.StatusOK, booking)
 }
 
-// CancelBooking cancels a specific booking by ID
+// CancelBooking handles cancellation of an existing booking
 // @Summary Cancel a booking
-// @Description Cancel a booking by its ID
+// @Description Cancel an existing booking
 // @Tags bookings
+// @Accept json
 // @Produce json
 // @Param id path int true "Booking ID"
-// @Success 200 {object} SuccessResponse
-// @Failure 400 {object} ErrorResponse
-// @Failure 404 {object} ErrorResponse
-// @Failure 500 {object} ErrorResponse
+// @Success 200 {object} controllers.SuccessResponse
+// @Failure 400 {object} controllers.ErrorResponse
+// @Failure 404 {object} controllers.ErrorResponse
+// @Failure 500 {object} controllers.ErrorResponse
 // @Router /bookings/{id}/cancel [put]
 func (bc *BookingController) CancelBooking(w http.ResponseWriter, r *http.Request) {
+	// Extract booking ID from the request
 	vars := mux.Vars(r)
-	id, err := strconv.Atoi(vars["id"])
+	bookingID, err := strconv.Atoi(vars["id"])
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "Invalid booking ID")
 		return
 	}
 
+	// Find the booking in the database
 	var booking models.Booking
-	if err := bc.DB.First(&booking, id).Error; err != nil {
-		respondWithError(w, http.StatusNotFound, "Booking not found")
+	if err := bc.DB.First(&booking, bookingID).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			respondWithError(w, http.StatusNotFound, "Booking not found")
+		} else {
+			respondWithError(w, http.StatusInternalServerError, err.Error())
+		}
 		return
 	}
 
-	booking.BookingStatus = "cancelled"
-
+	// Update the status to "cancelled"
+	booking.Status = "cancelled"
 	if err := bc.DB.Save(&booking).Error; err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
+	// Respond with success
 	respondWithJSON(w, http.StatusOK, map[string]string{"message": "Booking cancelled successfully"})
 }
 

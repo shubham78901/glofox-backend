@@ -4,13 +4,12 @@ import (
 	"glofox-backend/config"
 	"glofox-backend/controllers"
 	"glofox-backend/models"
-	"glofox-backend/routes"
 	"log"
 	"net/http"
-	"os"
 
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
+	"github.com/rs/cors" // Added missing import
 
 	httpSwagger "github.com/swaggo/http-swagger"
 	// Make sure this import path matches your project structure
@@ -43,49 +42,58 @@ func main() {
 	db.AutoMigrate(&models.Class{}, &models.Studio{}, &models.Booking{})
 
 	// Initialize router
-	r := mux.NewRouter()
+	router := mux.NewRouter()
 
-	// Setup API routes
-	apiRouter := r.PathPrefix("/api/v1").Subrouter()
-	routes.SetupStudioRoutes(apiRouter, db)
-	routes.SetupClassRoutes(apiRouter, db)
-	routes.SetupBookingRoutes(apiRouter, db)
+	// Create API subrouter
+	apiRouter := router.PathPrefix("/api/v1").Subrouter()
 
-	// Add middleware
-	r.Use(controllers.LoggingMiddleware)
+	// Initialize controllers
+	studioController := controllers.NewStudioController(db)
+	classController := controllers.NewClassController(db)
+	bookingController := controllers.NewBookingController(db)
 
-	// Configure Swagger - specifically for /swagger/index.html
-	// First, serve the /swagger/index.html endpoint
-	r.HandleFunc("/swagger/index.html", func(w http.ResponseWriter, r *http.Request) {
-		http.Redirect(w, r, "/swagger/", http.StatusMovedPermanently)
-	})
+	// Register routes
+	// Studio routes
+	apiRouter.HandleFunc("/studios", studioController.CreateStudio).Methods("POST")
+	apiRouter.HandleFunc("/studios", studioController.GetAllStudios).Methods("GET")
+	apiRouter.HandleFunc("/studios/{id}", studioController.GetStudio).Methods("GET")
+	apiRouter.HandleFunc("/studios/{id}", studioController.UpdateStudio).Methods("PUT")
+	apiRouter.HandleFunc("/studios/{id}", studioController.DeleteStudio).Methods("DELETE")
 
-	// Then handle the general /swagger/ path
-	r.PathPrefix("/swagger/").Handler(httpSwagger.Handler(
-		httpSwagger.URL("/swagger/doc.json"), // The URL pointing to API definition
+	// Class routes
+	apiRouter.HandleFunc("/classes", classController.CreateClass).Methods("POST")
+	apiRouter.HandleFunc("/classes", classController.GetAllClasses).Methods("GET")
+	apiRouter.HandleFunc("/classes/{id}", classController.GetClass).Methods("GET")
+	apiRouter.HandleFunc("/classes/{id}", classController.UpdateClass).Methods("PUT")
+	apiRouter.HandleFunc("/classes/{id}", classController.DeleteClass).Methods("DELETE")
+
+	// Booking routes
+	apiRouter.HandleFunc("/bookings", bookingController.CreateBooking).Methods("POST")
+	apiRouter.HandleFunc("/bookings", bookingController.GetAllBookings).Methods("GET")
+	apiRouter.HandleFunc("/bookings/{id}", bookingController.GetBooking).Methods("GET")
+	apiRouter.HandleFunc("/bookings/{id}", bookingController.UpdateBooking).Methods("PUT")
+	apiRouter.HandleFunc("/bookings/{id}", bookingController.DeleteBooking).Methods("DELETE")
+	apiRouter.HandleFunc("/bookings/{id}/cancel", bookingController.CancelBooking).Methods("PUT")
+
+	// Swagger documentation - using more explicit configuration
+	router.PathPrefix("/swagger/").Handler(httpSwagger.Handler(
+		httpSwagger.URL("http://localhost:8080/swagger/doc.json"), // The URL pointing to API definition
 		httpSwagger.DeepLinking(true),
 		httpSwagger.DocExpansion("none"),
-		httpSwagger.DomID("swagger-ui"),
+		httpSwagger.DomID("#swagger-ui"),
 	))
 
-	// Static files (if needed)
-	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
-
-	// Health check endpoint
-	r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("Service is healthy"))
+	// Use CORS middleware
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Content-Type", "Authorization"},
+		AllowCredentials: true,
 	})
 
-	// Get port from environment
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
+	handler := c.Handler(router)
 
 	// Start server
-	log.Printf("Server starting on port %s", port)
-	if err := http.ListenAndServe(":"+port, r); err != nil {
-		log.Fatalf("Failed to start server: %v", err)
-	}
+	log.Println("Server starting on port 8080...")
+	log.Fatal(http.ListenAndServe(":8080", handler))
 }

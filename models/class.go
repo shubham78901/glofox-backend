@@ -2,24 +2,36 @@ package models
 
 import (
 	"time"
-
-	"gorm.io/gorm"
 )
 
-// Class represents a fitness class
-// @Description Class model for studio offerings
+// Class represents a fitness class that can be booked
+// @Description Fitness class information
 type Class struct {
-	gorm.Model           // Embedded gorm.Model
-	ID         uint      `json:"id" gorm:"primaryKey" swaggerignore:"true"`
-	StudioID   uint      `json:"studio_id" gorm:"not null"`
-	Name       string    `json:"name" gorm:"not null"`
-	StartTime  time.Time `json:"start_time" gorm:"not null"`
-	EndTime    time.Time `json:"end_time" gorm:"not null"`
-	Capacity   int       `json:"capacity" gorm:"not null"`
-	// Add swaggerignore to fields that cause recursion issues
-	Studio    Studio     `json:"studio,omitempty" gorm:"foreignKey:StudioID" swaggerignore:"true"`
-	Bookings  []Booking  `json:"bookings,omitempty" gorm:"foreignKey:ClassID" swaggerignore:"true"`
-	CreatedAt time.Time  `json:"created_at" swaggerignore:"true"`
-	UpdatedAt time.Time  `json:"updated_at" swaggerignore:"true"`
-	DeletedAt *time.Time `json:"deleted_at,omitempty" swaggerignore:"true"`
+	// Standard gorm.Model fields
+	ID        uint       `json:"id" gorm:"primaryKey" example:"1"`
+	CreatedAt time.Time  `json:"created_at" example:"2025-04-26T07:38:52Z"`
+	UpdatedAt time.Time  `json:"updated_at" example:"2025-04-26T07:38:52Z"`
+	DeletedAt *time.Time `json:"deleted_at,omitempty" gorm:"index" swaggerignore:"true"`
+
+	// Custom class fields
+	Name        string    `json:"name" example:"Yoga Flow"`
+	Description string    `json:"description" example:"A flowing yoga class for all levels"`
+	StartTime   time.Time `json:"start_time" example:"2025-04-30T18:00:00Z"`
+	EndTime     time.Time `json:"end_time" example:"2025-04-30T19:00:00Z"`
+	Capacity    int       `json:"capacity" example:"20"`
+	StudioID    uint      `json:"studio_id" example:"1"`
+	Studio      Studio    `json:"studio" gorm:"foreignKey:StudioID" swaggerignore:"true"`
+	Bookings    []Booking `json:"bookings,omitempty" gorm:"foreignKey:ClassID" swaggerignore:"true"`
+}
+
+// NewClass creates a new class
+func NewClass(name, description string, startTime, endTime time.Time, capacity int, studioID uint) *Class {
+	return &Class{
+		Name:        name,
+		Description: description,
+		StartTime:   startTime,
+		EndTime:     endTime,
+		Capacity:    capacity,
+		StudioID:    studioID,
+	}
 }
