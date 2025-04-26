@@ -42,13 +42,6 @@ func (cc *ClassController) CreateClass(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	// Validate studio exists
-	var studio models.Studio
-	if err := cc.DB.First(&studio, class.StudioID).Error; err != nil {
-		respondWithError(w, http.StatusBadRequest, "Studio not found")
-		return
-	}
-
 	// Create class in database
 	if err := cc.DB.Create(&class).Error; err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())

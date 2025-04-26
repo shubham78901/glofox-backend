@@ -19,6 +19,4 @@ func SetupClassRoutes(router *mux.Router, db *gorm.DB) {
 	router.HandleFunc("/classes/{id}", classController.UpdateClass).Methods("PUT")
 	router.HandleFunc("/classes/{id}", classController.DeleteClass).Methods("DELETE")
 
-	// Studio-specific class routes
-	router.HandleFunc("/studios/{studioId}/classes", classController.GetClassesByStudio).Methods("GET")
 }

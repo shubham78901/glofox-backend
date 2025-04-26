@@ -39,7 +39,7 @@ func main() {
 	}
 
 	// Auto migrate database models
-	db.AutoMigrate(&models.Class{}, &models.Studio{}, &models.Booking{})
+	db.AutoMigrate(&models.Class{}, &models.Booking{})
 
 	// Initialize router
 	router := mux.NewRouter()

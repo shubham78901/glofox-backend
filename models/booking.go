@@ -1,32 +1,24 @@
+// models/booking.go
 package models
 
 import (
 	"time"
+
+	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
-// Booking represents a user booking for a class
-// @Description Booking information for classes
 type Booking struct {
-	// Standard gorm.Model fields
-	ID        uint       `json:"id" gorm:"primaryKey" example:"1"`
-	CreatedAt time.Time  `json:"created_at" example:"2025-04-26T07:38:52Z"`
-	UpdatedAt time.Time  `json:"updated_at" example:"2025-04-26T07:38:52Z"`
-	DeletedAt *time.Time `json:"deleted_at,omitempty" gorm:"index" swaggerignore:"true"`
-
-	// Custom booking fields
-	UserID   uint      `json:"user_id" example:"1"`
-	ClassID  uint      `json:"class_id" example:"2"`
-	BookedAt time.Time `json:"booked_at" example:"2025-04-26T07:38:52Z"`
-	Status   string    `json:"status" gorm:"default:'confirmed'" example:"confirmed"`
-	Class    Class     `json:"class" gorm:"foreignKey:ClassID" swaggerignore:"true"`
+	BookingUUID string         `json:"booking_uuid" gorm:"primaryKey"`
+	CreatedAt   time.Time      `json:"created_at"`
+	UpdatedAt   time.Time      `json:"updated_at"`
+	DeletedAt   gorm.DeletedAt `json:"deleted_at" gorm:"index"`
+	ClassID     string         `json:"class_id"` // Foreign key to reference Class
+	UserID      string         `json:"user_id"`
+	Status      string         `json:"status"`
 }
 
-// NewBooking creates a new booking
-func NewBooking(userID, classID uint) *Booking {
-	return &Booking{
-		UserID:   userID,
-		ClassID:  classID,
-		BookedAt: time.Now(),
-		Status:   "confirmed", // Default status
-	}
+func (b *Booking) BeforeCreate(tx *gorm.DB) (err error) {
+	b.BookingUUID = uuid.New().String()
+	return
 }
