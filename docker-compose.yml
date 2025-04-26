@@ -1,35 +1,39 @@
-version: '3.8'
+version: '3'
 
 services:
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: glofox-backend
+    build: .
     ports:
       - "8080:8080"
-    depends_on:
-      - postgres
     environment:
-      - PORT=8080
       - DB_HOST=postgres
       - DB_PORT=5432
-      - DB_USER=glofox
-      - DB_PASSWORD=glofox123
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
       - DB_NAME=glofox
-      - DB_SSLMODE=disable
+    depends_on:
+      - postgres
+    networks:
+      - glofox-network
+    restart: unless-stopped
 
   postgres:
-    image: postgres:14-alpine
-    container_name: glofox-postgres
-    ports:
-      - "5432:5432"
+    image: postgres:14
     environment:
-      - POSTGRES_USER=glofox
-      - POSTGRES_PASSWORD=glofox123
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=glofox
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - glofox-network
+    restart: unless-stopped
+
+networks:
+  glofox-network:
+    driver: bridge
 
 volumes:
-  postgres_data:
+  postgres-data:

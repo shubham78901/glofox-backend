@@ -214,3 +214,155 @@ make run
 - **Validation**: Input validation is performed at the model level before data persistence.
 - **Error Handling**: Consistent error responses are provided through the responses package.
 - **Dependency Injection**: Handlers are initialized with their required repositories, making testing and future changes easier.
+# Glofox Backend
+
+A fitness class booking backend application built with Go, GORM, and Gorilla Mux.
+
+## Features
+
+- Manage fitness studios
+- Create and manage classes
+- Handle booking process
+- RESTful API
+- Swagger documentation
+- Docker containerization
+
+## Tech Stack
+
+- **Language**: Go
+- **Web Framework**: Gorilla Mux
+- **ORM**: GORM
+- **Database**: PostgreSQL
+- **Documentation**: Swagger
+- **Containerization**: Docker & Docker Compose
+
+## Getting Started
+
+### Prerequisites
+
+- Go (1.19+)
+- Docker & Docker Compose
+- PostgreSQL (if running locally)
+
+### Running with Docker
+
+1. Clone the repository
+   ```sh
+   git clone https://github.com/shubham78901/glofox-backend.git
+   cd glofox-backend
+   ```
+
+2. Start the application using Docker Compose
+   ```sh
+   make docker-run
+   ```
+
+3. The API will be available at http://localhost:8080
+
+### Running Locally
+
+1. Clone the repository
+   ```sh
+   git clone https://github.com/shubham78901/glofox-backend.git
+   cd glofox-backend
+   ```
+
+2. Install dependencies
+   ```sh
+   make deps
+   ```
+
+3. Set up environment variables (copy `.env.example` to `.env` and modify as needed)
+
+4. Run the application
+   ```sh
+   make run
+   ```
+
+5. The API will be available at http://localhost:8080
+
+## API Documentation
+
+The API documentation is available at `/swagger/index.html` when the application is running.
+
+### Main Endpoints
+
+- **Studios**
+  - `GET /api/v1/studios` - Get all studios
+  - `POST /api/v1/studios` - Create a new studio
+  - `GET /api/v1/studios/{id}` - Get a specific studio
+  - `PUT /api/v1/studios/{id}` - Update a studio
+  - `DELETE /api/v1/studios/{id}` - Delete a studio
+
+- **Classes**
+  - `GET /api/v1/classes` - Get all classes
+  - `POST /api/v1/classes` - Create a new class
+  - `GET /api/v1/classes/{id}` - Get a specific class
+  - `PUT /api/v1/classes/{id}` - Update a class
+  - `DELETE /api/v1/classes/{id}` - Delete a class
+  - `GET /api/v1/studios/{studioId}/classes` - Get all classes for a studio
+
+- **Bookings**
+  - `GET /api/v1/bookings` - Get all bookings
+  - `POST /api/v1/bookings` - Create a new booking
+  - `GET /api/v1/bookings/{id}` - Get a specific booking
+  - `PUT /api/v1/bookings/{id}` - Update a booking
+  - `DELETE /api/v1/bookings/{id}` - Delete a booking
+  - `PUT /api/v1/bookings/{id}/cancel` - Cancel a booking
+  - `GET /api/v1/classes/{classId}/bookings` - Get all bookings for a class
+
+## Development
+
+### Useful Commands
+
+- `make build` - Build the application
+- `make run` - Run the application
+- `make test` - Run tests
+- `make fmt` - Format code
+- `make swagger` - Generate Swagger documentation
+- `make docker-build` - Build Docker image
+- `make docker-up` - Start Docker containers
+- `make docker-down` - Stop Docker containers
+- `make all` - Clean, get dependencies, format code, build, test, and run Docker containers
+
+## Project Structure
+
+```
+glofox-backend/
+├── config/
+│   └── database.go        # Database configuration
+├── controllers/
+│   ├── booking_controller.go
+│   ├── class_controller.go
+│   ├── studio_controller.go
+│   └── utils.go
+├── models/
+│   ├── booking.go
+│   ├── class.go
+│   └── studio.go
+├── routes/
+│   ├── booking_routes.go
+│   ├── class_routes.go
+│   └── studio_routes.go
+├── docs/                  # Swagger documentation
+├── .env                   # Environment variables
+├── docker-compose.yml
+├── Dockerfile
+├── go.mod
+├── go.sum
+├── main.go
+├── Makefile
+└── README.md
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.

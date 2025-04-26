@@ -1,54 +1,50 @@
-# App Name
-APP_NAME = glofox-backend
+.PHONY: build run clean test docker-build docker-up docker-down swagger
 
-# Docker image tag
-IMAGE_TAG = $(APP_NAME)
+# Run the application (stops previous containers, builds and runs in Docker)
+run:
+	docker-compose down
+	docker-compose up --build
 
-# Go build configuration
-GO_BUILD_FLAGS = -v
-MAIN_PATH = ./cmd/api
+# Clean Docker resources
+clean:
+	docker-compose down -v
+	docker system prune -f
 
-# API port
-API_PORT = 8080
-API_URL = http://localhost:$(API_PORT)
+# Run tests in a Docker container
+test:
+	docker-compose run --rm app go test -v ./...
 
-# Directories for tests
-TEST_DIRS = ./internal/api/handlers
+# Format code in a Docker container
+fmt:
+	docker-compose run --rm app go fmt ./...
+
+# Generate swagger documentation in a Docker container
+swagger:
+	docker-compose run --rm app swag init -g main.go -o ./docs
 
 # Build Docker image
 build:
-	docker build -t $(IMAGE_TAG) .
+	docker-compose build
 
-# Run app in detached mode (remove previous container if exists)
-run: stop build
-	docker run -d -p $(API_PORT):$(API_PORT) --name $(APP_NAME) $(IMAGE_TAG)
-
-# Stop and remove the container
-stop:
-	docker stop $(APP_NAME) 2>/dev/null || true
-	docker rm $(APP_NAME) 2>/dev/null || true
-
-# Start services with docker-compose
-compose-up:
+# Run Docker containers in detached mode
+up:
 	docker-compose up -d
 
-# Stop services
-compose-down:
+# Stop Docker containers
+down:
 	docker-compose down
 
-# Build the Go application locally
-go-build:
-	go build $(GO_BUILD_FLAGS) -o bin/$(APP_NAME) $(MAIN_PATH)
+# Show logs for running containers
+logs:
+	docker-compose logs -f
 
-# Run the Go application locally
-go-run:
-	go run $(MAIN_PATH)
+# Restart services
+restart:
+	docker-compose restart
 
-# Run unit tests
-test:
-	go test $(TEST_DIRS) -v
+# Show running containers
+ps:
+	docker-compose ps
 
-# Run a full test suite (unit tests and API tests)
-test-all: test
-
-.PHONY: build run stop compose-up compose-down go-build go-run test test-all
+# All-in-one command to restart fresh
+all: clean build up
