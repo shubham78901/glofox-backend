@@ -64,6 +64,7 @@ func (h *ClassHandler) CreateClass(w http.ResponseWriter, r *http.Request) {
 // @Param date query string false "Filter classes by date (YYYY-MM-DD)"
 // @Success 200 {object} responses.Response{data=[]models.Class} "List of classes"
 // @Failure 400 {object} responses.Response "Invalid date format"
+// @Failure 500 {object} responses.Response "Server error"
 // @Router /classes [get]
 func (h *ClassHandler) GetAllClasses(w http.ResponseWriter, r *http.Request) {
 	dateParam := r.URL.Query().Get("date")
@@ -74,12 +75,22 @@ func (h *ClassHandler) GetAllClasses(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		classes := h.repo.GetByDate(date)
+		classes, err := h.repo.GetByDate(date)
+		if err != nil {
+			responses.InternalServerErrorResponse(w)
+			return
+		}
+
 		responses.ListResponse(w, classes, len(classes))
 		return
 	}
 
-	classes := h.repo.GetAll()
+	classes, err := h.repo.GetAll()
+	if err != nil {
+		responses.InternalServerErrorResponse(w)
+		return
+	}
+
 	responses.ListResponse(w, classes, len(classes))
 }
 
@@ -91,6 +102,7 @@ func (h *ClassHandler) GetAllClasses(w http.ResponseWriter, r *http.Request) {
 // @Param id path string true "Class ID"
 // @Success 200 {object} responses.Response{data=models.Class} "Class found"
 // @Failure 404 {object} responses.Response "Class not found"
+// @Failure 500 {object} responses.Response "Server error"
 // @Router /classes/{id} [get]
 func (h *ClassHandler) GetClassByID(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)

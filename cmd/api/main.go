@@ -1,4 +1,4 @@
-
+// File: cmd/api/main.go
 
 package main
 
@@ -7,10 +7,13 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	_ "glofox-backend/docs"
 	"glofox-backend/internal/api"
 	"glofox-backend/internal/api/handlers"
+	"glofox-backend/internal/database"
+	"glofox-backend/internal/models"
 	"glofox-backend/internal/repositories"
 )
 
@@ -25,9 +28,20 @@ func main() {
 		port = "8080"
 	}
 
+	// Setup database connection
+	db, err := database.Connect()
+	if err != nil {
+		log.Fatalf("Failed to connect to database: %v", err)
+	}
+
+	// Auto migrate database schema
+	if err := db.AutoMigrate(&models.Class{}, &models.Booking{}); err != nil {
+		log.Fatalf("Failed to migrate database: %v", err)
+	}
+
 	// Initialize repositories
-	classRepo := repositories.NewClassRepository()
-	bookingRepo := repositories.NewBookingRepository(classRepo)
+	classRepo := repositories.NewClassRepository(db)
+	bookingRepo := repositories.NewBookingRepository(db)
 
 	// Initialize handlers
 	classHandler := handlers.NewClassHandler(classRepo)
@@ -36,10 +50,18 @@ func main() {
 	// Setup router
 	router := api.SetupRouter(classHandler, bookingHandler)
 
+	// Setup server
+	server := &http.Server{
+		Addr:         fmt.Sprintf(":%s", port),
+		Handler:      router,
+		ReadTimeout:  15 * time.Second,
+		WriteTimeout: 15 * time.Second,
+		IdleTimeout:  60 * time.Second,
+	}
+
 	// Start server
-	serverAddr := fmt.Sprintf(":%s", port)
-	log.Printf("Server is running on %s", serverAddr)
-	if err := http.ListenAndServe(serverAddr, router); err != nil {
+	log.Printf("Server is running on %s", server.Addr)
+	if err := server.ListenAndServe(); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
 }

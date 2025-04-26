@@ -32,6 +32,7 @@ func NewBookingHandler(repo repositories.BookingRepository) *BookingHandler {
 // @Param booking body models.BookingInput true "Booking information"
 // @Success 201 {object} responses.Response{data=models.Booking} "Booking created successfully"
 // @Failure 400 {object} responses.Response "Invalid input"
+// @Failure 500 {object} responses.Response "Server error"
 // @Router /bookings [post]
 func (h *BookingHandler) CreateBooking(w http.ResponseWriter, r *http.Request) {
 	var input models.BookingInput
@@ -60,9 +61,15 @@ func (h *BookingHandler) CreateBooking(w http.ResponseWriter, r *http.Request) {
 // @Tags bookings
 // @Produce json
 // @Success 200 {object} responses.Response{data=[]models.Booking} "List of bookings"
+// @Failure 500 {object} responses.Response "Server error"
 // @Router /bookings [get]
 func (h *BookingHandler) GetAllBookings(w http.ResponseWriter, r *http.Request) {
-	bookings := h.repo.GetAll()
+	bookings, err := h.repo.GetAll()
+	if err != nil {
+		responses.InternalServerErrorResponse(w)
+		return
+	}
+
 	responses.ListResponse(w, bookings, len(bookings))
 }
 
@@ -74,6 +81,7 @@ func (h *BookingHandler) GetAllBookings(w http.ResponseWriter, r *http.Request) 
 // @Param id path string true "Booking ID"
 // @Success 200 {object} responses.Response{data=models.Booking} "Booking found"
 // @Failure 404 {object} responses.Response "Booking not found"
+// @Failure 500 {object} responses.Response "Server error"
 // @Router /bookings/{id} [get]
 func (h *BookingHandler) GetBookingByID(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
