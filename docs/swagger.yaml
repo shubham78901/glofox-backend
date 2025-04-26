@@ -15,8 +15,60 @@ definitions:
         type: string
     type: object
   models.Booking:
+    description: Booking information
+    properties:
+      booking_uuid:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      class_id:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      created_at:
+        example: "2025-04-26T00:00:00Z"
+        format: date-time
+        type: string
+      status:
+        example: confirmed
+        type: string
+      updated_at:
+        example: "2025-04-26T00:00:00Z"
+        format: date-time
+        type: string
+      user_id:
+        example: user123
+        type: string
     type: object
   models.Class:
+    description: Class information
+    properties:
+      capacity:
+        example: 20
+        type: integer
+      class_uuid:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      created_at:
+        example: "2025-04-26T00:00:00Z"
+        format: date-time
+        type: string
+      description:
+        example: A relaxing yoga session for beginners
+        type: string
+      end_time:
+        example: "2025-04-26T10:00:00Z"
+        format: date-time
+        type: string
+      name:
+        example: Yoga Class
+        type: string
+      start_time:
+        example: "2025-04-26T09:00:00Z"
+        format: date-time
+        type: string
+      updated_at:
+        example: "2025-04-26T00:00:00Z"
+        format: date-time
+        type: string
     type: object
 host: localhost:8080
 info:

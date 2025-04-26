@@ -568,10 +568,78 @@
             }
         },
         "models.Booking": {
-            "type": "object"
+            "description": "Booking information",
+            "type": "object",
+            "properties": {
+                "booking_uuid": {
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "class_id": {
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "created_at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2025-04-26T00:00:00Z"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "confirmed"
+                },
+                "updated_at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2025-04-26T00:00:00Z"
+                },
+                "user_id": {
+                    "type": "string",
+                    "example": "user123"
+                }
+            }
         },
         "models.Class": {
-            "type": "object"
+            "description": "Class information",
+            "type": "object",
+            "properties": {
+                "capacity": {
+                    "type": "integer",
+                    "example": 20
+                },
+                "class_uuid": {
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "created_at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2025-04-26T00:00:00Z"
+                },
+                "description": {
+                    "type": "string",
+                    "example": "A relaxing yoga session for beginners"
+                },
+                "end_time": {
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2025-04-26T10:00:00Z"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Yoga Class"
+                },
+                "start_time": {
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2025-04-26T09:00:00Z"
+                },
+                "updated_at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2025-04-26T00:00:00Z"
+                }
+            }
         }
     }
 }
