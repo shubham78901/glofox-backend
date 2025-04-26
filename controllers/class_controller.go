@@ -104,33 +104,6 @@ func (cc *ClassController) GetClass(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, class)
 }
 
-// GetClassesByStudio retrieves all classes for a specific studio
-// @Summary Get classes by studio
-// @Description Get all classes for a specific studio
-// @Tags classes
-// @Produce json
-// @Param studioId path int true "Studio ID"
-// @Success 200 {array} models.Class
-// @Failure 400 {object} ErrorResponse
-// @Failure 500 {object} ErrorResponse
-// @Router /studios/{studioId}/classes [get]
-func (cc *ClassController) GetClassesByStudio(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	studioID, err := strconv.Atoi(vars["studioId"])
-	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid studio ID")
-		return
-	}
-
-	var classes []models.Class
-	if err := cc.DB.Where("studio_id = ?", studioID).Find(&classes).Error; err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	respondWithJSON(w, http.StatusOK, classes)
-}
-
 // UpdateClass updates a specific class by ID
 // @Summary Update a class
 // @Description Update a class's information

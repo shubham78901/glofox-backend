@@ -20,8 +20,8 @@ type Class struct {
 	EndTime     time.Time `json:"end_time" example:"2025-04-30T19:00:00Z"`
 	Capacity    int       `json:"capacity" example:"20"`
 	StudioID    uint      `json:"studio_id" example:"1"`
-	Studio      Studio    `json:"studio" gorm:"foreignKey:StudioID" swaggerignore:"true"`
-	Bookings    []Booking `json:"bookings,omitempty" gorm:"foreignKey:ClassID" swaggerignore:"true"`
+
+	Bookings []Booking `json:"bookings,omitempty" gorm:"foreignKey:ClassID" swaggerignore:"true"`
 }
 
 // NewClass creates a new class

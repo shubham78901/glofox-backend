@@ -47,18 +47,8 @@ func main() {
 	// Create API subrouter
 	apiRouter := router.PathPrefix("/api/v1").Subrouter()
 
-	// Initialize controllers
-	studioController := controllers.NewStudioController(db)
 	classController := controllers.NewClassController(db)
 	bookingController := controllers.NewBookingController(db)
-
-	// Register routes
-	// Studio routes
-	apiRouter.HandleFunc("/studios", studioController.CreateStudio).Methods("POST")
-	apiRouter.HandleFunc("/studios", studioController.GetAllStudios).Methods("GET")
-	apiRouter.HandleFunc("/studios/{id}", studioController.GetStudio).Methods("GET")
-	apiRouter.HandleFunc("/studios/{id}", studioController.UpdateStudio).Methods("PUT")
-	apiRouter.HandleFunc("/studios/{id}", studioController.DeleteStudio).Methods("DELETE")
 
 	// Class routes
 	apiRouter.HandleFunc("/classes", classController.CreateClass).Methods("POST")
@@ -76,13 +66,12 @@ func main() {
 	apiRouter.HandleFunc("/bookings/{id}/cancel", bookingController.CancelBooking).Methods("PUT")
 
 	// Swagger documentation - using more explicit configuration
+	// Swagger documentation
 	router.PathPrefix("/swagger/").Handler(httpSwagger.Handler(
-		httpSwagger.URL("http://localhost:8080/swagger/doc.json"), // The URL pointing to API definition
+		httpSwagger.URL("/swagger/doc.json"), // Note the relative URL
 		httpSwagger.DeepLinking(true),
 		httpSwagger.DocExpansion("none"),
-		httpSwagger.DomID("#swagger-ui"),
 	))
-
 	// Use CORS middleware
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
