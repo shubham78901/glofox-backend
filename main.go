@@ -54,8 +54,6 @@ func main() {
 	apiRouter.HandleFunc("/classes", classController.CreateClass).Methods("POST")
 	apiRouter.HandleFunc("/classes", classController.GetAllClasses).Methods("GET")
 	apiRouter.HandleFunc("/classes/{id}", classController.GetClass).Methods("GET")
-	apiRouter.HandleFunc("/classes/{id}", classController.UpdateClass).Methods("PUT")
-	apiRouter.HandleFunc("/classes/{id}", classController.DeleteClass).Methods("DELETE")
 
 	// Booking routes
 	apiRouter.HandleFunc("/bookings", bookingController.CreateBooking).Methods("POST")

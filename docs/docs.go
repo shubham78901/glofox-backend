@@ -299,13 +299,21 @@ const docTemplate = `{
                     "classes"
                 ],
                 "summary": "Get all classes",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Filter classes by date (YYYY-MM-DD)",
+                        "name": "date",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/models.Class"
+                                "$ref": "#/definitions/models.ResClass"
                             }
                         }
                     },
@@ -344,7 +352,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/models.Class"
+                            "$ref": "#/definitions/models.ResClass"
                         }
                     },
                     "400": {
@@ -408,18 +416,19 @@ const docTemplate = `{
         },
         "/classes/{id}": {
             "get": {
-                "description": "Get a fitness class by its ID",
+                "description": "Get a fitness class by its UUID",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "classes"
                 ],
-                "summary": "Get a class by ID",
+                "summary": "Get a class by UUID",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Class ID",
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Class UUID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -429,103 +438,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.Class"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/controllers.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/controllers.ErrorResponse"
-                        }
-                    }
-                }
-            },
-            "put": {
-                "description": "Update a class's information",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "classes"
-                ],
-                "summary": "Update a class",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Class ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Class information",
-                        "name": "class",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.Class"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.Class"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/controllers.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/controllers.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/controllers.ErrorResponse"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "description": "Delete a class by its ID",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "classes"
-                ],
-                "summary": "Delete a class",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Class ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/controllers.SuccessResponse"
+                            "$ref": "#/definitions/models.ResClass"
                         }
                     },
                     "400": {
@@ -577,10 +490,6 @@ const docTemplate = `{
             "description": "Booking information",
             "type": "object",
             "properties": {
-                "booking_uuid": {
-                    "type": "string",
-                    "example": "550e8400-e29b-41d4-a716-446655440000"
-                },
                 "class_id": {
                     "type": "string",
                     "example": "550e8400-e29b-41d4-a716-446655440000"
@@ -606,14 +515,44 @@ const docTemplate = `{
             }
         },
         "models.Class": {
-            "description": "Class information",
+            "description": "Class information (database model)",
             "type": "object",
             "properties": {
                 "capacity": {
                     "type": "integer",
+                    "minimum": 1,
                     "example": 20
                 },
-                "class_uuid": {
+                "description": {
+                    "type": "string",
+                    "example": "A relaxing yoga session for beginners"
+                },
+                "end_time": {
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2025-04-26T10:00:00Z"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Yoga Class"
+                },
+                "start_time": {
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2025-04-26T09:00:00Z"
+                }
+            }
+        },
+        "models.ResClass": {
+            "description": "Class information in API responses",
+            "type": "object",
+            "properties": {
+                "capacity": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "example": 20
+                },
+                "classId": {
                     "type": "string",
                     "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
@@ -639,11 +578,6 @@ const docTemplate = `{
                     "type": "string",
                     "format": "date-time",
                     "example": "2025-04-26T09:00:00Z"
-                },
-                "updated_at": {
-                    "type": "string",
-                    "format": "date-time",
-                    "example": "2025-04-26T00:00:00Z"
                 }
             }
         }

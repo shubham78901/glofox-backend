@@ -17,9 +17,6 @@ definitions:
   models.Booking:
     description: Booking information
     properties:
-      booking_uuid:
-        example: 550e8400-e29b-41d4-a716-446655440000
-        type: string
       class_id:
         example: 550e8400-e29b-41d4-a716-446655440000
         type: string
@@ -39,12 +36,35 @@ definitions:
         type: string
     type: object
   models.Class:
-    description: Class information
+    description: Class information (database model)
     properties:
       capacity:
         example: 20
+        minimum: 1
         type: integer
-      class_uuid:
+      description:
+        example: A relaxing yoga session for beginners
+        type: string
+      end_time:
+        example: "2025-04-26T10:00:00Z"
+        format: date-time
+        type: string
+      name:
+        example: Yoga Class
+        type: string
+      start_time:
+        example: "2025-04-26T09:00:00Z"
+        format: date-time
+        type: string
+    type: object
+  models.ResClass:
+    description: Class information in API responses
+    properties:
+      capacity:
+        example: 20
+        minimum: 1
+        type: integer
+      classId:
         example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       created_at:
@@ -63,10 +83,6 @@ definitions:
         type: string
       start_time:
         example: "2025-04-26T09:00:00Z"
-        format: date-time
-        type: string
-      updated_at:
-        example: "2025-04-26T00:00:00Z"
         format: date-time
         type: string
     type: object
@@ -262,6 +278,11 @@ paths:
   /classes:
     get:
       description: Get all fitness classes
+      parameters:
+      - description: Filter classes by date (YYYY-MM-DD)
+        in: query
+        name: date
+        type: string
       produces:
       - application/json
       responses:
@@ -269,7 +290,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/models.Class'
+              $ref: '#/definitions/models.ResClass'
             type: array
         "500":
           description: Internal Server Error
@@ -295,7 +316,7 @@ paths:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/models.Class'
+            $ref: '#/definitions/models.ResClass'
         "400":
           description: Bad Request
           schema:
@@ -337,85 +358,22 @@ paths:
       tags:
       - bookings
   /classes/{id}:
-    delete:
-      description: Delete a class by its ID
-      parameters:
-      - description: Class ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/controllers.SuccessResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/controllers.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/controllers.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/controllers.ErrorResponse'
-      summary: Delete a class
-      tags:
-      - classes
     get:
-      description: Get a fitness class by its ID
+      description: Get a fitness class by its UUID
       parameters:
-      - description: Class ID
+      - description: Class UUID
+        format: uuid
         in: path
         name: id
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.Class'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/controllers.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/controllers.ErrorResponse'
-      summary: Get a class by ID
-      tags:
-      - classes
-    put:
-      consumes:
-      - application/json
-      description: Update a class's information
-      parameters:
-      - description: Class ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Class information
-        in: body
-        name: class
-        required: true
-        schema:
-          $ref: '#/definitions/models.Class'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.Class'
+            $ref: '#/definitions/models.ResClass'
         "400":
           description: Bad Request
           schema:
@@ -428,7 +386,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/controllers.ErrorResponse'
-      summary: Update a class
+      summary: Get a class by UUID
       tags:
       - classes
 swagger: "2.0"

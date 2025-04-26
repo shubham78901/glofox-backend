@@ -2,13 +2,14 @@ package controllers
 
 import (
 	"encoding/json"
-	"glofox-backend/models"
+	"errors"
 	"net/http"
-	"strconv"
+	"time"
+
+	"glofox-backend/models"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
-
 	"gorm.io/gorm"
 )
 
@@ -29,28 +30,53 @@ func NewClassController(db *gorm.DB) *ClassController {
 // @Accept json
 // @Produce json
 // @Param class body models.Class true "Class information"
-// @Success 201 {object} models.Class
+// @Success 201 {object} models.ResClass
 // @Failure 400 {object} ErrorResponse
 // @Failure 500 {object} ErrorResponse
 // @Router /classes [post]
 func (cc *ClassController) CreateClass(w http.ResponseWriter, r *http.Request) {
-	var class models.Class
+	var input models.Class
 
 	// Decode request body
-	if err := json.NewDecoder(r.Body).Decode(&class); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		respondWithError(w, http.StatusBadRequest, "Invalid request payload")
 		return
 	}
 	defer r.Body.Close()
-	class.ClassUUID = uuid.New().String()
 
-	// Create class in database
-	if err := cc.DB.Create(&class).Error; err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
+	// Validate input
+	if input.StartTime.After(input.EndTime) {
+		respondWithError(w, http.StatusBadRequest, "Start time must be before end time")
 		return
 	}
 
-	respondWithJSON(w, http.StatusCreated, class)
+	// Create class from input
+	class := models.Class{
+		Name:        input.Name,
+		Description: input.Description,
+		StartTime:   input.StartTime,
+		EndTime:     input.EndTime,
+		Capacity:    input.Capacity,
+	}
+
+	// Create class in database
+	if err := cc.DB.Create(&class).Error; err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Failed to create class")
+		return
+	}
+
+	// Prepare response
+	resClass := models.ResClass{
+		ClassUUID:   class.ClassUUID,
+		CreatedAt:   class.CreatedAt,
+		Name:        class.Name,
+		Description: class.Description,
+		StartTime:   class.StartTime,
+		EndTime:     class.EndTime,
+		Capacity:    class.Capacity,
+	}
+
+	respondWithJSON(w, http.StatusCreated, resClass)
 }
 
 // GetAllClasses retrieves all classes
@@ -58,119 +84,86 @@ func (cc *ClassController) CreateClass(w http.ResponseWriter, r *http.Request) {
 // @Description Get all fitness classes
 // @Tags classes
 // @Produce json
-// @Success 200 {array} models.Class
+// @Param date query string false "Filter classes by date (YYYY-MM-DD)"
+// @Success 200 {object} []models.ResClass
 // @Failure 500 {object} ErrorResponse
 // @Router /classes [get]
 func (cc *ClassController) GetAllClasses(w http.ResponseWriter, r *http.Request) {
 	var classes []models.Class
+	query := cc.DB
 
-	if err := cc.DB.Find(&classes).Error; err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
+	// Add date filter if provided
+	if date := r.URL.Query().Get("date"); date != "" {
+		parsedDate, err := time.Parse("2006-01-02", date)
+		if err != nil {
+			respondWithError(w, http.StatusBadRequest, "Invalid date format. Use YYYY-MM-DD")
+			return
+		}
+		query = query.Where("DATE(start_time) = ?", parsedDate.Format("2006-01-02"))
+	}
+
+	if err := query.Find(&classes).Error; err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Failed to retrieve classes")
 		return
 	}
 
-	respondWithJSON(w, http.StatusOK, classes)
+	// Convert to response models
+	var resClasses []models.ResClass
+	for _, class := range classes {
+		resClasses = append(resClasses, models.ResClass{
+			ClassUUID:   class.ClassUUID,
+			CreatedAt:   class.CreatedAt,
+			Name:        class.Name,
+			Description: class.Description,
+			StartTime:   class.StartTime,
+			EndTime:     class.EndTime,
+			Capacity:    class.Capacity,
+		})
+	}
+
+	respondWithJSON(w, http.StatusOK, resClasses)
 }
 
-// GetClass retrieves a specific class by ID
-// @Summary Get a class by ID
-// @Description Get a fitness class by its ID
+// GetClass retrieves a specific class by UUID
+// @Summary Get a class by UUID
+// @Description Get a fitness class by its UUID
 // @Tags classes
 // @Produce json
-// @Param id path int true "Class ID"
-// @Success 200 {object} models.Class
+// @Param id path string true "Class UUID" Format(uuid)
+// @Success 200 {object} models.ResClass
+// @Failure 400 {object} ErrorResponse
 // @Failure 404 {object} ErrorResponse
 // @Failure 500 {object} ErrorResponse
 // @Router /classes/{id} [get]
 func (cc *ClassController) GetClass(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	id, err := strconv.Atoi(vars["id"])
-	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid class ID")
+	classUUID := vars["id"]
+
+	// Validate UUID format
+	if _, err := uuid.Parse(classUUID); err != nil {
+		respondWithError(w, http.StatusBadRequest, "Invalid UUID format")
 		return
 	}
 
 	var class models.Class
-	if err := cc.DB.First(&class, id).Error; err != nil {
-		respondWithError(w, http.StatusNotFound, "Class not found")
+	if err := cc.DB.Where("class_uuid = ?", classUUID).First(&class).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			respondWithError(w, http.StatusNotFound, "Class not found")
+		} else {
+			respondWithError(w, http.StatusInternalServerError, "Database error")
+		}
 		return
 	}
 
-	respondWithJSON(w, http.StatusOK, class)
-}
-
-// UpdateClass updates a specific class by ID
-// @Summary Update a class
-// @Description Update a class's information
-// @Tags classes
-// @Accept json
-// @Produce json
-// @Param id path int true "Class ID"
-// @Param class body models.Class true "Class information"
-// @Success 200 {object} models.Class
-// @Failure 400 {object} ErrorResponse
-// @Failure 404 {object} ErrorResponse
-// @Failure 500 {object} ErrorResponse
-// @Router /classes/{id} [put]
-func (cc *ClassController) UpdateClass(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	id, err := strconv.Atoi(vars["id"])
-	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid class ID")
-		return
+	resClass := models.ResClass{
+		ClassUUID:   class.ClassUUID,
+		CreatedAt:   class.CreatedAt,
+		Name:        class.Name,
+		Description: class.Description,
+		StartTime:   class.StartTime,
+		EndTime:     class.EndTime,
+		Capacity:    class.Capacity,
 	}
 
-	var class models.Class
-	if err := cc.DB.First(&class, id).Error; err != nil {
-		respondWithError(w, http.StatusNotFound, "Class not found")
-		return
-	}
-
-	// Decode request body
-	if err := json.NewDecoder(r.Body).Decode(&class); err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid request payload")
-		return
-	}
-	defer r.Body.Close()
-
-	// Update class in database
-	if err := cc.DB.Save(&class).Error; err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	respondWithJSON(w, http.StatusOK, class)
-}
-
-// DeleteClass deletes a specific class by ID
-// @Summary Delete a class
-// @Description Delete a class by its ID
-// @Tags classes
-// @Produce json
-// @Param id path int true "Class ID"
-// @Success 200 {object} SuccessResponse
-// @Failure 400 {object} ErrorResponse
-// @Failure 404 {object} ErrorResponse
-// @Failure 500 {object} ErrorResponse
-// @Router /classes/{id} [delete]
-func (cc *ClassController) DeleteClass(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	id, err := strconv.Atoi(vars["id"])
-	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid class ID")
-		return
-	}
-
-	var class models.Class
-	if err := cc.DB.First(&class, id).Error; err != nil {
-		respondWithError(w, http.StatusNotFound, "Class not found")
-		return
-	}
-
-	if err := cc.DB.Delete(&class).Error; err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	respondWithJSON(w, http.StatusOK, map[string]string{"message": "Class deleted successfully"})
+	respondWithJSON(w, http.StatusOK, resClass)
 }
