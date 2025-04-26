@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 
 	"gorm.io/gorm"
@@ -41,6 +42,7 @@ func (cc *ClassController) CreateClass(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer r.Body.Close()
+	class.ClassUUID = uuid.New().String()
 
 	// Create class in database
 	if err := cc.DB.Create(&class).Error; err != nil {

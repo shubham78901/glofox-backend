@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 
 	"gorm.io/gorm"
@@ -41,7 +42,7 @@ func (bc *BookingController) CreateBooking(w http.ResponseWriter, r *http.Reques
 		return
 	}
 	defer r.Body.Close()
-
+	booking.BookingUUID = uuid.New().String()
 	// Validate class exists
 	var class models.Class
 	if err := bc.DB.First(&class, booking.ClassID).Error; err != nil {

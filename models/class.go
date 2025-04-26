@@ -11,7 +11,7 @@ import (
 // Class represents a fitness class that can be booked
 // @Description Class information
 type Class struct {
-	ClassUUID   string         `json:"class_uuid" gorm:"primaryKey" swaggertype:"string" example:"550e8400-e29b-41d4-a716-446655440000"`
+	ClassUUID   string         `json:"-" gorm:"primaryKey" swaggertype:"string" example:"550e8400-e29b-41d4-a716-446655440000"`
 	CreatedAt   time.Time      `json:"created_at" swaggertype:"string" format:"date-time" example:"2025-04-26T00:00:00Z"`
 	UpdatedAt   time.Time      `json:"updated_at" swaggertype:"string" format:"date-time" example:"2025-04-26T00:00:00Z"`
 	DeletedAt   gorm.DeletedAt `json:"-" gorm:"index" swaggerignore:"true"`
